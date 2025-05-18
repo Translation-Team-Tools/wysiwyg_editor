@@ -32,7 +32,7 @@ const App: React.FC = () => {
   }, [content]);
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
+    <div className="editor-container container mx-auto p-4 max-w-4xl">
       <h1 className="text-2xl font-bold mb-4">WYSIWYG Editor</h1>
       
       <BaseEditor 
