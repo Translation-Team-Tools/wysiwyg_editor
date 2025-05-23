@@ -15,10 +15,10 @@ const BaseEditor: React.FC<BaseEditorProps> = ({
   }
 
   return (
-    <div className="border rounded-md">
+    <div className="border rounded-md w-full max-w-full mx-auto">
       <EditorToolbar editor={editor} />
       <div className="p-4">
-        <EditorContent editor={editor} className="prose max-w-none" />
+        <EditorContent editor={editor} className="min-h-32" />
       </div>
     </div>
   );
