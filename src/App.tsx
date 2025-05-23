@@ -1,13 +1,13 @@
 import React from 'react';
 import BaseEditor from './features/editor/BaseEditor';
-import { useEditorContent } from './hooks/useEditorContent.ts';
+import { useEditorContent } from './shared/hooks/useEditorContent.ts';
 
 const App: React.FC = () => {
   const { content, setContent, formattedHtml } = useEditorContent();
 
   return (
     <div className="editor-container container mx-auto p-4 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-4">WYSIWYG Editor</h1>
+      <h1 className="text-2xl font-bold mb-4">Editor</h1>
       
       <BaseEditor 
         content={content} 

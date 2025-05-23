@@ -1,6 +1,6 @@
 import React from 'react';
 import { EditorContent } from '@tiptap/react';
-import { EditorToolbar } from './components/EditorToolBar.tsx';
+import { EditorToolbar } from './components/EditorToolbar.tsx';
 import { useBaseEditor } from './hooks/useBaseEditor.ts';
 import { BaseEditorProps } from './types';
 
