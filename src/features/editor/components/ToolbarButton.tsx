@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './css/ToolbatButton.module.css'
 
 interface ToolbarButtonProps {
   onClick: () => void;
@@ -17,7 +18,7 @@ export const ToolbarButton: React.FC<ToolbarButtonProps> = ({
     <button
       onClick={onClick}
       title={title}
-      className={`p-2 rounded hover:bg-gray-200 ${isActive ? 'bg-gray-200' : ''}`}
+      className={styles.button}
       type="button"
     >
       {children}

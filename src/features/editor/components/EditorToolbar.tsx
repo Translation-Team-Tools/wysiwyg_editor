@@ -2,6 +2,7 @@ import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3 } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
+import styles from './css/EditorToolbar.module.css'
 
 interface EditorToolbarProps {
   editor: Editor;
@@ -14,7 +15,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const toggleHeading = (level: 1 | 2 | 3) => editor.chain().focus().toggleHeading({ level }).run();
 
   return (
-    <div className="flex gap-1 p-2 border-b">
+    <div className={styles.toolbar}>
       <ToolbarButton 
         onClick={toggleBold}
         isActive={editor.isActive('bold')}
@@ -39,7 +40,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
         <UnderlineIcon size={18} />
       </ToolbarButton>
 
-      <div className="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+      <div className={styles.divider}></div>
 
       <ToolbarButton 
         onClick={() => toggleHeading(1)}
