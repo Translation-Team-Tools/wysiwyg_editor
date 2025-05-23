@@ -2,7 +2,7 @@ import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3 } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
-import styles from './css/EditorToolbar.module.css'
+import styles from './EditorToolbar.module.css'
 
 interface EditorToolbarProps {
   editor: Editor;

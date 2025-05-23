@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './css/ToolbatButton.module.css'
+import styles from './ToolbatButton.module.css'
 
 interface ToolbarButtonProps {
   onClick: () => void;
