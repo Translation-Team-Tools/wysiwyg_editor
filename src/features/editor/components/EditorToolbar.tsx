@@ -1,7 +1,7 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3 } from 'lucide-react';
-import { ToolbarButton } from './ToolBarButton.tsx';
+import { ToolbarButton } from './ToolbarButton';
 
 interface EditorToolbarProps {
   editor: Editor;
