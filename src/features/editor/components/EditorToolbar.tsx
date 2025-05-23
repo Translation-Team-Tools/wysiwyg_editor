@@ -16,21 +16,19 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   
   const insertChapter = () => {
     const chapterCount = editor.getHTML().match(/data-type="chapter"/g)?.length || 0;
-    const chapterId = `ch${chapterCount + 1}`;
-    
-    editor.chain().focus().setChapter({ 
-      id: chapterId, 
-      title: `Chapter ${chapterCount + 1}` 
+    editor.chain().focus().setSection({ 
+      id: `ch${chapterCount + 1}`,
+      title: `Chapter ${chapterCount + 1}`,
+      sectionType: 'chapter'
     }).run();
   };
   
   const insertPart = () => {
     const partCount = editor.getHTML().match(/data-type="part"/g)?.length || 0;
-    const partId = `pt${partCount + 1}`;
-    
-    editor.chain().focus().setPart({ 
-      id: partId, 
-      title: `Part ${partCount + 1}` 
+    editor.chain().focus().setSection({ 
+      id: `pt${partCount + 1}`,
+      title: `Part ${partCount + 1}`,
+      sectionType: 'part'
     }).run();
   };
 
@@ -90,7 +88,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
 
       <ToolbarButton 
         onClick={insertChapter}
-        isActive={editor.isActive('chapter')}
+        isActive={editor.isActive('section', { sectionType: 'chapter' })}
         title="Insert Chapter"
       >
         <BookOpen size={18} />
@@ -98,7 +96,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
 
       <ToolbarButton 
         onClick={insertPart}
-        isActive={editor.isActive('part')}
+        isActive={editor.isActive('section', { sectionType: 'part' })}
         title="Insert Part"
       >
         <FileText size={18} />

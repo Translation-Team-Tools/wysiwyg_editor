@@ -1,22 +1,25 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
-import { ChapterNodeView } from './ChapterNodeView';
+import { SectionNodeView } from './SectionNodeView';
 
-export interface ChapterOptions {
+export interface SectionOptions {
   HTMLAttributes: Record<string, any>;
 }
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
-    chapter: {
-      setChapter: (attributes?: { id?: string; title?: string }) => ReturnType;
-      toggleChapter: (attributes?: { id?: string; title?: string }) => ReturnType;
+    section: {
+      setSection: (attributes?: { 
+        id?: string; 
+        title?: string; 
+        sectionType?: 'chapter' | 'part' | 'section';
+      }) => ReturnType;
     };
   }
 }
 
-export const ChapterExtension = Node.create<ChapterOptions>({
-  name: 'chapter',
+export const SectionExtension = Node.create<SectionOptions>({
+  name: 'section',
 
   priority: 1000,
 
@@ -47,7 +50,7 @@ export const ChapterExtension = Node.create<ChapterOptions>({
         },
       },
       title: {
-        default: 'Chapter',
+        default: 'Section',
         parseHTML: element => element.getAttribute('data-title'),
         renderHTML: attributes => {
           if (!attributes.title) {
@@ -55,6 +58,15 @@ export const ChapterExtension = Node.create<ChapterOptions>({
           }
           return {
             'data-title': attributes.title,
+          };
+        },
+      },
+      sectionType: {
+        default: 'chapter',
+        parseHTML: element => element.getAttribute('data-type') || 'chapter',
+        renderHTML: attributes => {
+          return {
+            'data-type': attributes.sectionType || 'chapter',
           };
         },
       },
@@ -66,6 +78,12 @@ export const ChapterExtension = Node.create<ChapterOptions>({
       {
         tag: 'section[data-type="chapter"]',
       },
+      {
+        tag: 'section[data-type="part"]',
+      },
+      {
+        tag: 'section[data-type="section"]',
+      },
     ];
   },
 
@@ -73,7 +91,6 @@ export const ChapterExtension = Node.create<ChapterOptions>({
     return [
       'section',
       mergeAttributes(
-        { 'data-type': 'chapter' },
         this.options.HTMLAttributes,
         HTMLAttributes
       ),
@@ -82,29 +99,28 @@ export const ChapterExtension = Node.create<ChapterOptions>({
   },
 
   addNodeView() {
-    return ReactNodeViewRenderer(ChapterNodeView);
+    return ReactNodeViewRenderer(SectionNodeView);
   },
 
   addCommands() {
     return {
-      setChapter:
+      setSection:
         (attributes) =>
         ({ commands }) => {
-          const { id = `ch${Date.now()}`, title = 'Chapter' } = attributes || {};
-          const html = `<section data-type="chapter" id="${id}" data-title="${title}"><p>Chapter content goes here...</p></section>`;
+          const { 
+            id = `section${Date.now()}`, 
+            title = 'Section',
+            sectionType = 'chapter'
+          } = attributes || {};
+          const html = `<section data-type="${sectionType}" id="${id}" data-title="${title}"><p>Section content goes here...</p></section>`;
           return commands.insertContent(html);
-        },
-      toggleChapter:
-        (attributes) =>
-        ({ commands }) => {
-          return commands.toggleNode(this.name, 'paragraph', attributes);
         },
     };
   },
 
   addKeyboardShortcuts() {
     return {
-      'Mod-Shift-c': () => this.editor.commands.setChapter(),
+      'Mod-Shift-s': () => this.editor.commands.setSection(),
     };
   },
 });

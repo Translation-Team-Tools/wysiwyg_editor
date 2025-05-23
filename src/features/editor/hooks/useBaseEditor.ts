@@ -1,7 +1,7 @@
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
-import { ChapterExtension, PartExtension } from '../extensions';
+import { SectionExtension } from '../extensions';
 
 interface UseBaseEditorProps {
   content: string;
@@ -13,8 +13,7 @@ export const useBaseEditor = ({ content, onChange }: UseBaseEditorProps) => {
     extensions: [
       StarterKit,
       Underline,
-      ChapterExtension,
-      PartExtension,
+      SectionExtension,
     ],
     content,
     onUpdate: ({ editor }) => {

@@ -1,2 +1,1 @@
-export * from './Chapter';
-export * from './Part';
+export * from './Section';
