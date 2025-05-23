@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseEditor from './features/editor/BaseEditor';
+import BaseEditor from './features/editor';
 import { useEditorContent } from './shared/hooks/useEditorContent.ts';
 import styles from './App.module.css';
 
