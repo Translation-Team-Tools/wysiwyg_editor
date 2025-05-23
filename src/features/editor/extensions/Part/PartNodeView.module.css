@@ -1,0 +1,103 @@
+.partWrapper {
+  border: 1px solid #d1d9e0;
+  border-radius: 6px;
+  margin: 12px 0;
+  background: #ffffff;
+  position: relative;
+}
+
+.partWrapper:hover {
+  border-color: #0084cc;
+  box-shadow: 0 1px 4px rgba(0, 132, 204, 0.1);
+}
+
+.partHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 5px 5px 0 0;
+}
+
+.partInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.partIcon {
+  color: #0084cc;
+  flex-shrink: 0;
+}
+
+.partTitle h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.partId {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: normal;
+  margin-left: 6px;
+}
+
+.editForm {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.titleInput,
+.idInput {
+  padding: 5px 7px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+.titleInput {
+  flex: 2;
+}
+
+.idInput {
+  flex: 1;
+  max-width: 120px;
+}
+
+.partActions {
+  display: flex;
+  gap: 3px;
+}
+
+.actionButton {
+  padding: 5px;
+  border: none;
+  background: #e9ecef;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background: #dee2e6;
+}
+
+.deleteButton:hover {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.partContent {
+  padding: 14px;
+  min-height: 80px;
+  background: #ffffff;
+}
