@@ -53,6 +53,18 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
     return { found: false };
   };
 
+  // Helper to find the deepest container depth
+  const getDeepestContainerDepth = (): number | undefined => {
+    const { state } = editor;
+    for (let i = state.selection.$from.depth; i > 0; i--) {
+      const node = state.selection.$from.node(i);
+      if (node.type.name === 'section' && node.attrs.tagName === 'div') {
+        return i; // Return the deepest container depth
+      }
+    }
+    return undefined;
+  };
+
   // Helper to find end position of element at depth
   const findEndAt = (depth: number, tagName?: string): number | undefined => {
     const element = getElementAt(depth, tagName);
@@ -100,13 +112,10 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
     
     let insertPos: number | undefined = undefined;
     if (isInContainer()) {
-      // Find deepest container and insert after it
-      for (let depth = 2; depth <= 5; depth++) {
-        const pos = findEndAt(depth, 'div');
-        if (pos !== undefined) { 
-          insertPos = pos; 
-          break; 
-        }
+      // Find the deepest container we're in and insert after it
+      const deepestDepth = getDeepestContainerDepth();
+      if (deepestDepth !== undefined) {
+        insertPos = findEndAt(deepestDepth, 'div');
       }
     }
     insertAt(html, insertPos);
