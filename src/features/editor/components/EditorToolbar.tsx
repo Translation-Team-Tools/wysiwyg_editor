@@ -1,6 +1,6 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, BookOpen, FileText } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, BookOpen, FileText, Type } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
 import styles from './EditorToolbar.module.css'
 
@@ -12,7 +12,12 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const toggleBold = () => editor.chain().focus().toggleBold().run();
   const toggleItalic = () => editor.chain().focus().toggleItalic().run();
   const toggleUnderline = () => editor.chain().focus().toggleUnderline().run();
+  const toggleParagraph = () => editor.chain().focus().setParagraph().run();
   const toggleHeading = (level: 1 | 2 | 3) => editor.chain().focus().toggleHeading({ level }).run();
+
+  const isAnyHeadingActive = editor.isActive('heading', { level: 1 }) || 
+                          editor.isActive('heading', { level: 2 }) || 
+                          editor.isActive('heading', { level: 3 });
   
   const insertChapter = () => {
     const chapterCount = editor.getHTML().match(/data-type="chapter"/g)?.length || 0;
@@ -59,6 +64,14 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
       </ToolbarButton>
 
       <div className={styles.divider}></div>
+
+    <ToolbarButton 
+      onClick={toggleParagraph}
+      isActive={!isAnyHeadingActive && editor.isActive('paragraph')}
+      title="Normal Text"
+    >
+      <Type size={18} />
+    </ToolbarButton>
 
       <ToolbarButton 
         onClick={() => toggleHeading(1)}
