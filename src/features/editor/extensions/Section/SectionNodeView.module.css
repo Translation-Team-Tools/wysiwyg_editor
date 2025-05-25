@@ -1,188 +1,110 @@
-/* Base section styles */
 .sectionWrapper {
-  border-radius: 8px;
-  margin: 16px 0;
-  position: relative;
-  transition: all 0.2s ease;
+  border: 1px solid #e1e5e9;
+  border-radius: 4px;
+  margin: 8px 0;
+  background: #ffffff;
 }
 
 .sectionWrapper:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #c6cbd1;
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background: #ffffff;
-  border-radius: 6px 6px 0 0;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e1e5e9;
+  cursor: pointer;
+  user-select: none;
 }
 
-.sectionInfo {
+.sectionHeader:hover {
+  background: #f1f3f5;
+}
+
+.displayMode {
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 1;
 }
 
-.sectionIcon {
-  flex-shrink: 0;
-}
-
-.sectionTitle h2,
-.sectionTitle h3,
-.sectionTitle h4 {
-  margin: 0;
+.title {
   font-weight: 600;
+  color: #343a40;
+  font-size: 0.95rem;
 }
 
-.sectionTitle h2 {
-  font-size: 1.25rem;
-  color: #1a1a1a;
-}
-
-.sectionTitle h3 {
-  font-size: 1.1rem;
-  color: #2c3e50;
-}
-
-.sectionTitle h4 {
-  font-size: 1rem;
-  color: #495057;
-}
-
-.sectionId {
-  font-size: 0.875rem;
-  color: #666;
+.id {
+  font-size: 0.8rem;
+  color: #6c757d;
   font-weight: normal;
-  margin-left: 8px;
+  font-family: monospace;
 }
 
-.editForm {
+.editMode {
   display: flex;
   gap: 8px;
   flex: 1;
   align-items: center;
-}
-
-.typeSelect {
-  padding: 6px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  background: white;
-  min-width: 100px;
 }
 
 .titleInput {
-  padding: 6px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  padding: 4px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  font-weight: 600;
   flex: 2;
+  background: white;
+}
+
+.titleInput:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
 }
 
 .idInput {
-  padding: 6px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.875rem;
+  padding: 4px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  font-size: 0.8rem;
   flex: 1;
-  max-width: 150px;
+  max-width: 120px;
+  font-family: monospace;
+  background: white;
 }
 
-.sectionActions {
-  display: flex;
-  gap: 4px;
+.idInput:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
 }
 
-.actionButton {
-  padding: 6px;
+.deleteButton {
+  padding: 4px;
   border: none;
-  background: #f1f3f5;
-  border-radius: 4px;
+  background: transparent;
+  border-radius: 3px;
   cursor: pointer;
+  color: #6c757d;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
-}
-
-.actionButton:hover {
-  background: #e9ecef;
+  opacity: 0.7;
+  transition: all 0.2s;
 }
 
 .deleteButton:hover {
   background: #fee;
-  color: #d63384;
+  color: #dc3545;
+  opacity: 1;
 }
 
 .sectionContent {
-  padding: 16px;
-  min-height: 80px;
-  background: #ffffff;
-}
-
-/* Chapter-specific styles */
-.chapterWrapper {
-  border: 2px solid #e1e5e9;
-  background: #f8f9fa;
-}
-
-.chapterWrapper:hover {
-  border-color: #0066cc;
-}
-
-.chapterWrapper .sectionHeader {
-  border-bottom: 1px solid #e1e5e9;
-}
-
-.chapterWrapper .sectionIcon {
-  color: #0066cc;
-}
-
-/* Part-specific styles */
-.partWrapper {
-  border: 1px solid #d1d9e0;
-  background: #ffffff;
-  margin-left: 20px;
-}
-
-.partWrapper:hover {
-  border-color: #0084cc;
-}
-
-.partWrapper .sectionHeader {
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.partWrapper .sectionIcon {
-  color: #0084cc;
-}
-
-/* Generic section styles */
-.sectionWrapper {
-  border: 1px solid #dee2e6;
-  background: #ffffff;
-}
-
-.sectionWrapper:hover {
-  border-color: #6c757d;
-}
-
-.sectionWrapper .sectionHeader {
-  background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.sectionWrapper .sectionIcon {
-  color: #6c757d;
-}
-
-/* Nested styling for parts within chapters */
-.chapterWrapper .partWrapper {
-  border-left: 3px solid #0066cc;
-  border-radius: 0 8px 8px 0;
+  padding: 12px;
+  min-height: 60px;
 }

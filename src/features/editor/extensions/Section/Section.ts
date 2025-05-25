@@ -12,7 +12,7 @@ declare module '@tiptap/core' {
       setSection: (attributes?: { 
         id?: string; 
         title?: string; 
-        sectionType?: 'chapter' | 'part' | 'section';
+        tagName?: 'section' | 'div';
       }) => ReturnType;
     };
   }
@@ -50,7 +50,7 @@ export const SectionExtension = Node.create<SectionOptions>({
         },
       },
       title: {
-        default: 'Section',
+        default: 'Untitled',
         parseHTML: element => element.getAttribute('data-title'),
         renderHTML: attributes => {
           if (!attributes.title) {
@@ -61,13 +61,14 @@ export const SectionExtension = Node.create<SectionOptions>({
           };
         },
       },
-      sectionType: {
-        default: 'chapter',
-        parseHTML: element => element.getAttribute('data-type') || 'chapter',
+      tagName: {
+        default: 'section',
+        parseHTML: element => {
+          return element.tagName.toLowerCase() === 'div' ? 'div' : 'section';
+        },
         renderHTML: attributes => {
-          return {
-            'data-type': attributes.sectionType || 'chapter',
-          };
+          // This attribute is used internally but not rendered to HTML
+          return {};
         },
       },
     };
@@ -76,20 +77,18 @@ export const SectionExtension = Node.create<SectionOptions>({
   parseHTML() {
     return [
       {
-        tag: 'section[data-type="chapter"]',
+        tag: 'section[data-title]',
       },
       {
-        tag: 'section[data-type="part"]',
-      },
-      {
-        tag: 'section[data-type="section"]',
+        tag: 'div[data-title]',
       },
     ];
   },
 
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ HTMLAttributes, node }) {
+    const tagName = node.attrs.tagName || 'section';
     return [
-      'section',
+      tagName,
       mergeAttributes(
         this.options.HTMLAttributes,
         HTMLAttributes
@@ -109,10 +108,13 @@ export const SectionExtension = Node.create<SectionOptions>({
         ({ commands }) => {
           const { 
             id = `section${Date.now()}`, 
-            title = 'Section',
-            sectionType = 'chapter'
+            title = 'Untitled',
+            tagName = 'section'
           } = attributes || {};
-          const html = `<section data-type="${sectionType}" id="${id}" data-title="${title}"><p>Section content goes here...</p></section>`;
+          
+          const htmlTagName = tagName === 'div' ? 'div' : 'section';
+          const html = `<${htmlTagName} id="${id}" data-title="${title}"><p>Content goes here...</p></${htmlTagName}>`;
+          
           return commands.insertContent(html);
         },
     };
@@ -120,7 +122,8 @@ export const SectionExtension = Node.create<SectionOptions>({
 
   addKeyboardShortcuts() {
     return {
-      'Mod-Shift-s': () => this.editor.commands.setSection(),
+      'Mod-Shift-s': () => this.editor.commands.setSection({ tagName: 'section' }),
+      'Mod-Shift-d': () => this.editor.commands.setSection({ tagName: 'div' }),
     };
   },
 });
