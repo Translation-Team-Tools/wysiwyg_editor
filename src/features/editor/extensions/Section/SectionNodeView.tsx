@@ -74,7 +74,7 @@ export const SectionNodeView: React.FC<SectionNodeViewProps> = ({
     }
   };
 
-  const TitleTag = config.titleTag as keyof JSX.IntrinsicElements;
+  const TitleTag = config.titleTag as keyof React.JSX.IntrinsicElements;
 
   return (
     <NodeViewWrapper className={`${styles.sectionWrapper} ${styles[config.className]}`}>
