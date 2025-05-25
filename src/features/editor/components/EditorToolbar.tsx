@@ -42,7 +42,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   };
 
   // Helper function to check if cursor is inside a chapter and get chapter info
-  const getChapterContext = () => {
+  const getChapterContext = (): 
+    | { isInChapter: false }
+    | { isInChapter: true; chapterStart: number; chapterEnd: number; chapterSize: number } => {
     const { state } = editor;
     for (let i = state.selection.$from.depth; i > 0; i--) {
       const node = state.selection.$from.node(i);
@@ -73,19 +75,31 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
     return false;
   };
 
-  // Add Chapter - always inserts at root level at the end of document
+  // Add Chapter - inserts after current chapter if inside one, otherwise at document end
   const insertChapter = () => {
     const chapterCount = getChapterCount() + 1;
     const chapterHtml = `<section id="chapter${chapterCount}" data-title="Chapter ${chapterCount}"><p>Chapter content goes here...</p></section>`;
     
-    // Get document size and insert at the end
-    const { state } = editor;
-    const endPos = state.doc.content.size;
+    const chapterContext = getChapterContext();
     
-    editor.chain()
-      .focus()
-      .insertContentAt(endPos, chapterHtml)
-      .run();
+    if (chapterContext.isInChapter) {
+      // We're inside a chapter - insert after the current chapter
+      const insertPos = chapterContext.chapterStart + chapterContext.chapterSize;
+      
+      editor.chain()
+        .focus()
+        .insertContentAt(insertPos, chapterHtml)
+        .run();
+    } else {
+      // We're not inside any chapter - insert at document end
+      const { state } = editor;
+      const endPos = state.doc.content.size;
+      
+      editor.chain()
+        .focus()
+        .insertContentAt(endPos, chapterHtml)
+        .run();
+    }
   };
   
   // Add Part - only inserts inside chapters, never nested in other parts
