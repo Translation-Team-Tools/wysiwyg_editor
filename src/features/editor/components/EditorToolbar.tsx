@@ -1,6 +1,6 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, BookOpen, FileText, Box, Type, RemoveFormatting } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, BookOpen, FileText, Box, Square, Type, RemoveFormatting } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
 import styles from './EditorToolbar.module.css'
 
@@ -75,6 +75,23 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
     return false;
   };
 
+  // Helper function to check if cursor is inside a container (div)
+  const isInsideContainer = () => {
+    const { state } = editor;
+    for (let i = state.selection.$from.depth; i > 0; i--) {
+      const node = state.selection.$from.node(i);
+      if (node.type.name === 'section' && node.attrs.tagName === 'div') {
+        return true; // We're inside a container (div)
+      }
+    }
+    return false;
+  };
+
+  // Helper function to check if we can insert a container
+  const canInsertContainer = () => {
+    return isInsidePart() || isInsideContainer();
+  };
+
   // Add Chapter - inserts after current chapter if inside one, otherwise at document end
   const insertChapter = () => {
     const chapterCount = getChapterCount() + 1;
@@ -144,14 +161,61 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
     }
   };
 
-  // Add Special Container - inserts a div element
+  // Add Special Container - only inserts inside parts or other containers (sibling by default)
   const insertContainer = () => {
+    if (!canInsertContainer()) {
+      alert('Special containers can only be added inside parts or other containers. Please position your cursor inside a part or container first.');
+      return;
+    }
+
     const containerCount = getContainerCount() + 1;
-    editor.chain().focus().setSection({ 
-      id: `container${containerCount}`,
-      title: `Container ${containerCount}`,
-      tagName: 'div'
-    }).run();
+    const containerHtml = `<div id="container${containerCount}" data-title="Container ${containerCount}"><p>Container content goes here...</p></div>`;
+    
+    if (isInsideContainer()) {
+      // We're inside a container - find the end of current container and insert after it (as sibling)
+      const { state } = editor;
+      let insertPos = state.selection.from;
+      
+      // Walk up to find the container we're in and get its end position
+      for (let i = state.selection.$from.depth; i > 0; i--) {
+        const node = state.selection.$from.node(i);
+        if (node.type.name === 'section' && node.attrs.tagName === 'div') {
+          // Found the container we're in
+          const containerStart = state.selection.$from.start(i);
+          const containerSize = node.nodeSize;
+          insertPos = containerStart + containerSize - 1; // Insert after this container
+          break;
+        }
+      }
+      
+      editor.chain()
+        .focus()
+        .insertContentAt(insertPos, containerHtml)
+        .run();
+    } else {
+      // We're in a part but not in a container - insert at current position
+      editor.chain()
+        .focus()
+        .insertContent(containerHtml)
+        .run();
+    }
+  };
+
+  // Add Nested Container - forces nesting inside current container
+  const insertNestedContainer = () => {
+    if (!canInsertContainer()) {
+      alert('Special containers can only be added inside parts or other containers. Please position your cursor inside a part or container first.');
+      return;
+    }
+
+    const containerCount = getContainerCount() + 1;
+    const containerHtml = `<div id="container${containerCount}" data-title="Container ${containerCount}"><p>Container content goes here...</p></div>`;
+    
+    // Always insert at current position (will nest if inside container)
+    editor.chain()
+      .focus()
+      .insertContent(containerHtml)
+      .run();
   };
 
   return (
@@ -241,9 +305,16 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
 
       <ToolbarButton 
         onClick={insertContainer}
-        title="Add Special Container (div)"
+        title="Add Container (as sibling)"
       >
         <Box size={18} />
+      </ToolbarButton>
+
+      <ToolbarButton 
+        onClick={insertNestedContainer}
+        title="Add Nested Container (inside current)"
+      >
+        <Square size={18} />
       </ToolbarButton>
     </div>
   );
