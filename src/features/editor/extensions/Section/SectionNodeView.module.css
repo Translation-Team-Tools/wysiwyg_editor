@@ -16,7 +16,6 @@
   padding: 8px 12px;
   background: #f8f9fa;
   border-bottom: 1px solid #e1e5e9;
-  cursor: pointer;
   user-select: none;
 }
 
@@ -35,6 +34,20 @@
   font-weight: 600;
   color: #343a40;
   font-size: 0.95rem;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  transition: background-color 0.2s;
+}
+
+.title:hover {
+  background: rgba(0, 102, 204, 0.1);
+}
+
+.titleEditing {
+  background: rgba(0, 102, 204, 0.1) !important;
+  outline: 1px solid #0066cc;
+  cursor: text;
 }
 
 .id {
@@ -42,46 +55,20 @@
   color: #6c757d;
   font-weight: normal;
   font-family: monospace;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 2px;
+  transition: background-color 0.2s;
 }
 
-.editMode {
-  display: flex;
-  gap: 8px;
-  flex: 1;
-  align-items: center;
+.id:hover {
+  background: rgba(108, 117, 125, 0.1);
 }
 
-.titleInput {
-  padding: 4px 8px;
-  border: 1px solid #ced4da;
-  border-radius: 3px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  flex: 2;
-  background: white;
-}
-
-.titleInput:focus {
-  outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
-}
-
-.idInput {
-  padding: 4px 8px;
-  border: 1px solid #ced4da;
-  border-radius: 3px;
-  font-size: 0.8rem;
-  flex: 1;
-  max-width: 120px;
-  font-family: monospace;
-  background: white;
-}
-
-.idInput:focus {
-  outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+.idEditing {
+  background: rgba(108, 117, 125, 0.1) !important;
+  outline: 1px solid #6c757d;
+  cursor: text;
 }
 
 .deleteButton {

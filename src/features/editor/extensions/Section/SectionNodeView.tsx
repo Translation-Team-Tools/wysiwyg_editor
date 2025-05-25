@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import { X } from 'lucide-react';
 import styles from './SectionNodeView.module.css';
@@ -14,50 +14,100 @@ export const SectionNodeView: React.FC<SectionNodeViewProps> = ({
   updateAttributes,
   deleteNode,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempTitle, setTempTitle] = useState(node.attrs.title || '');
-  const [tempId, setTempId] = useState(node.attrs.id || '');
-  const titleInputRef = useRef<HTMLInputElement>(null);
-  const idInputRef = useRef<HTMLInputElement>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingId, setIsEditingId] = useState(false);
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const idRef = useRef<HTMLSpanElement>(null);
 
-  useEffect(() => {
-    if (isEditing && titleInputRef.current) {
-      titleInputRef.current.focus();
-      titleInputRef.current.select();
-    }
-  }, [isEditing]);
-
-  const handleSave = () => {
-    updateAttributes({
-      title: tempTitle || 'Untitled',
-      id: tempId || `section${Date.now()}`,
-    });
-    setIsEditing(false);
+  const handleTitleDoubleClick = () => {
+    setIsEditingTitle(true);
+    setTimeout(() => {
+      if (titleRef.current) {
+        titleRef.current.focus();
+        // Select all text
+        const range = document.createRange();
+        range.selectNodeContents(titleRef.current);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
+    }, 0);
   };
 
-  const handleCancel = () => {
-    setTempTitle(node.attrs.title || '');
-    setTempId(node.attrs.id || '');
-    setIsEditing(false);
+  const handleIdDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent title editing
+    setIsEditingId(true);
+    setTimeout(() => {
+      if (idRef.current) {
+        idRef.current.focus();
+        // Select all text
+        const range = document.createRange();
+        range.selectNodeContents(idRef.current);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
+    }, 0);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleSave();
+      saveTitleChanges();
     } else if (e.key === 'Escape') {
       e.preventDefault();
-      handleCancel();
+      cancelTitleEdit();
     }
   };
 
-  const handleDoubleClick = () => {
-    setIsEditing(true);
+  const handleIdKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveIdChanges();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelIdEdit();
+    }
   };
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsEditing(true);
+  const saveTitleChanges = () => {
+    const newTitle = titleRef.current?.textContent?.trim() || 'Untitled';
+    updateAttributes({
+      title: newTitle,
+    });
+    setIsEditingTitle(false);
+  };
+
+  const saveIdChanges = () => {
+    let newId = idRef.current?.textContent?.trim() || '';
+    // Remove # if user included it
+    newId = newId.startsWith('#') ? newId.slice(1) : newId;
+    updateAttributes({
+      id: newId || `section${Date.now()}`,
+    });
+    setIsEditingId(false);
+  };
+
+  const cancelTitleEdit = () => {
+    if (titleRef.current) {
+      titleRef.current.textContent = node.attrs.title || 'Untitled';
+    }
+    setIsEditingTitle(false);
+  };
+
+  const cancelIdEdit = () => {
+    if (idRef.current) {
+      idRef.current.textContent = node.attrs.id || '';
+    }
+    setIsEditingId(false);
+  };
+
+  const handleTitleBlur = () => {
+    saveTitleChanges();
+  };
+
+  const handleIdBlur = () => {
+    saveIdChanges();
   };
 
   const handleDelete = () => {
@@ -66,55 +116,54 @@ export const SectionNodeView: React.FC<SectionNodeViewProps> = ({
     }
   };
 
-  const handleBlur = () => {
-    handleSave();
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleTitleDoubleClick();
   };
 
   return (
     <NodeViewWrapper className={styles.sectionWrapper}>
       <div 
         className={styles.sectionHeader}
-        onDoubleClick={handleDoubleClick}
+        contentEditable={false} // Prevent TipTap from interfering
         onContextMenu={handleContextMenu}
       >
-        {isEditing ? (
-          <div className={styles.editMode}>
-            <input
-              ref={titleInputRef}
-              type="text"
-              value={tempTitle}
-              onChange={(e) => setTempTitle(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={handleBlur}
-              placeholder="Title"
-              className={styles.titleInput}
-            />
-            <input
-              ref={idInputRef}
-              type="text"
-              value={tempId}
-              onChange={(e) => setTempId(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onBlur={handleBlur}
-              placeholder="ID"
-              className={styles.idInput}
-            />
-          </div>
-        ) : (
-          <div className={styles.displayMode}>
-            <span className={styles.title}>
-              {node.attrs.title || 'Untitled'}
+        <div className={styles.displayMode}>
+          <span 
+            ref={titleRef}
+            className={`${styles.title} ${isEditingTitle ? styles.titleEditing : ''}`}
+            contentEditable={isEditingTitle}
+            onDoubleClick={handleTitleDoubleClick}
+            onKeyDown={handleTitleKeyDown}
+            onBlur={handleTitleBlur}
+            suppressContentEditableWarning={true}
+            onMouseDown={(e) => isEditingTitle && e.stopPropagation()} // Prevent TipTap interference
+            onFocus={(e) => e.stopPropagation()} // Prevent TipTap interference
+          >
+            {node.attrs.title || 'Untitled'}
+          </span>
+          {node.attrs.id && (
+            <span 
+              ref={idRef}
+              className={`${styles.id} ${isEditingId ? styles.idEditing : ''}`}
+              contentEditable={isEditingId}
+              onDoubleClick={handleIdDoubleClick}
+              onKeyDown={handleIdKeyDown}
+              onBlur={handleIdBlur}
+              suppressContentEditableWarning={true}
+              onMouseDown={(e) => isEditingId && e.stopPropagation()} // Prevent TipTap interference
+              onFocus={(e) => e.stopPropagation()} // Prevent TipTap interference
+            >
+              #{node.attrs.id}
             </span>
-            {node.attrs.id && (
-              <span className={styles.id}>#{node.attrs.id}</span>
-            )}
-          </div>
-        )}
+          )}
+        </div>
         
         <button 
           onClick={handleDelete} 
           className={styles.deleteButton}
           title="Delete"
+          onMouseDown={(e) => e.stopPropagation()} // Prevent TipTap interference
         >
           <X size={14} />
         </button>
