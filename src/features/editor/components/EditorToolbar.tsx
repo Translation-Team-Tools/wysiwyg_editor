@@ -1,6 +1,6 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, BookOpen, FileText, Type } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, BookOpen, FileText, Type, RemoveFormatting } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
 import styles from './EditorToolbar.module.css'
 
@@ -12,12 +12,16 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const toggleBold = () => editor.chain().focus().toggleBold().run();
   const toggleItalic = () => editor.chain().focus().toggleItalic().run();
   const toggleUnderline = () => editor.chain().focus().toggleUnderline().run();
+  const clearTextFormatting = () => editor.chain().focus().unsetAllMarks().run();
   const toggleParagraph = () => editor.chain().focus().setParagraph().run();
   const toggleHeading = (level: 1 | 2 | 3) => editor.chain().focus().toggleHeading({ level }).run();
 
   const isAnyHeadingActive = editor.isActive('heading', { level: 1 }) || 
                           editor.isActive('heading', { level: 2 }) || 
                           editor.isActive('heading', { level: 3 });
+  const hasTextFormatting = editor.isActive('bold') || 
+                          editor.isActive('italic') || 
+                          editor.isActive('underline');
   
   const insertChapter = () => {
     const chapterCount = editor.getHTML().match(/data-type="chapter"/g)?.length || 0;
@@ -63,7 +67,17 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
         <UnderlineIcon size={18} />
       </ToolbarButton>
 
-      <div className={styles.divider}></div>
+    <div className={styles.divider}></div>
+
+    <ToolbarButton 
+      onClick={clearTextFormatting}
+      isActive={hasTextFormatting}
+      title='Reset formatting'
+      >
+      <RemoveFormatting size={18} />
+    </ToolbarButton>
+
+    <div className={styles.divider}></div>
 
     <ToolbarButton 
       onClick={toggleParagraph}
