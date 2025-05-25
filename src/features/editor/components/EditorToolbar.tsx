@@ -8,6 +8,41 @@ interface EditorToolbarProps {
   editor: Editor;
 }
 
+type ElementType = 'chapter' | 'part' | 'container';
+type TagName = 'section' | 'div';
+
+interface ElementConfig {
+  tagName: TagName;
+  idPrefix: string;
+  titlePrefix: string;
+  htmlPattern: RegExp;
+  contentPlaceholder: string;
+}
+
+const ELEMENT_CONFIGS: Record<ElementType, ElementConfig> = {
+  chapter: {
+    tagName: 'section',
+    idPrefix: 'chapter',
+    titlePrefix: 'Chapter',
+    htmlPattern: /<section[^>]*data-title="[^"]*"[^>]*>/g,
+    contentPlaceholder: 'Chapter content goes here...'
+  },
+  part: {
+    tagName: 'section',
+    idPrefix: 'part',
+    titlePrefix: 'Part',
+    htmlPattern: /<section[^>]*data-title="[^"]*"[^>]*>/g,
+    contentPlaceholder: 'Part content goes here...'
+  },
+  container: {
+    tagName: 'div',
+    idPrefix: 'container',
+    titlePrefix: 'Container',
+    htmlPattern: /<div[^>]*data-title="[^"]*"[^>]*>/g,
+    contentPlaceholder: 'Container content goes here...'
+  }
+};
+
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const toggleBold = () => editor.chain().focus().toggleBold().run();
   const toggleItalic = () => editor.chain().focus().toggleItalic().run();
@@ -20,202 +55,166 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
                           editor.isActive('heading', { level: 2 }) || 
                           editor.isActive('heading', { level: 3 });
 
-  // Helper function to get the current chapter count for naming
-  const getChapterCount = () => {
+  // Generic function to count elements by type
+  const getElementCount = (type: ElementType): number => {
     const html = editor.getHTML();
-    const sections = html.match(/<section[^>]*data-title="[^"]*"[^>]*>/g) || [];
-    return sections.length;
+    const matches = html.match(ELEMENT_CONFIGS[type].htmlPattern) || [];
+    return matches.length;
   };
 
-  // Helper function to get the current part count for naming
-  const getPartCount = () => {
-    const html = editor.getHTML();
-    const sections = html.match(/<section[^>]*data-title="[^"]*"[^>]*>/g) || [];
-    return sections.length;
+  // Generic function to generate HTML for any element
+  const generateElementHtml = (type: ElementType, count: number): string => {
+    const config = ELEMENT_CONFIGS[type];
+    const id = `${config.idPrefix}${count}`;
+    const title = `${config.titlePrefix} ${count}`;
+    return `<${config.tagName} id="${id}" data-title="${title}"><p>${config.contentPlaceholder}</p></${config.tagName}>`;
   };
 
-  // Helper function to get the current container count for naming
-  const getContainerCount = () => {
-    const html = editor.getHTML();
-    const divs = html.match(/<div[^>]*data-title="[^"]*"[^>]*>/g) || [];
-    return divs.length;
-  };
-
-  // Helper function to check if cursor is inside a chapter and get chapter info
-  const getChapterContext = (): 
-    | { isInChapter: false }
-    | { isInChapter: true; chapterStart: number; chapterEnd: number; chapterSize: number } => {
+  // Generic function to find element context at specific depth
+  const getElementContext = (depth: number, tagName?: TagName): 
+    | { found: false }
+    | { found: true; start: number; end: number; size: number } => {
     const { state } = editor;
     for (let i = state.selection.$from.depth; i > 0; i--) {
       const node = state.selection.$from.node(i);
-      if (node.type.name === 'section' && i === 1) {
-        // We're inside a root-level section (chapter)
-        const chapterStart = state.selection.$from.start(i);
-        const chapterEnd = state.selection.$from.end(i);
-        return { 
-          isInChapter: true, 
-          chapterStart: chapterStart - 1, // Adjust for node position
-          chapterEnd: chapterEnd - 1,
-          chapterSize: node.nodeSize 
+      const isMatch = node.type.name === 'section' && 
+                      i === depth && 
+                      (!tagName || node.attrs.tagName === tagName);
+      
+      if (isMatch) {
+        const start = state.selection.$from.start(i);
+        const end = state.selection.$from.end(i);
+        return {
+          found: true,
+          start: start - 1,
+          end: end - 1,
+          size: node.nodeSize
         };
       }
     }
-    return { isInChapter: false };
+    return { found: false };
   };
 
-  // Helper function to check if cursor is inside a part
-  const isInsidePart = () => {
+  // Generic function to find end position of current element at depth
+  const findElementEndPosition = (depth: number, tagName?: TagName): number | null => {
     const { state } = editor;
     for (let i = state.selection.$from.depth; i > 0; i--) {
       const node = state.selection.$from.node(i);
-      if (node.type.name === 'section' && i === 2) {
-        return true; // We're inside a nested section (part)
+      const isMatch = node.type.name === 'section' && 
+                      i === depth && 
+                      (!tagName || node.attrs.tagName === tagName);
+      
+      if (isMatch) {
+        const start = state.selection.$from.start(i);
+        return start + node.nodeSize - 1;
       }
     }
-    return false;
+    return null;
   };
 
-  // Helper function to check if cursor is inside a container (div)
-  const isInsideContainer = () => {
-    const { state } = editor;
-    for (let i = state.selection.$from.depth; i > 0; i--) {
-      const node = state.selection.$from.node(i);
-      if (node.type.name === 'section' && node.attrs.tagName === 'div') {
-        return true; // We're inside a container (div)
-      }
+  // Generic insertion helper
+  const insertElement = (html: string, position?: number) => {
+    const chain = editor.chain().focus();
+    if (position !== undefined) {
+      chain.insertContentAt(position, html);
+    } else {
+      chain.insertContent(html);
     }
-    return false;
+    chain.run();
   };
 
-  // Helper function to check if we can insert a container
-  const canInsertContainer = () => {
-    return isInsidePart() || isInsideContainer();
-  };
+  // Context checkers using generic helper
+  const getChapterContext = () => getElementContext(1);
+  const isInsidePart = () => getElementContext(2).found;
+  const isInsideContainer = () => getElementContext(2, 'div').found || getElementContext(3, 'div').found || getElementContext(4, 'div').found;
+  const canInsertContainer = () => isInsidePart() || isInsideContainer();
 
-  // Add Chapter - inserts after current chapter if inside one, otherwise at document end
+  // Insert Chapter - smart positioning
   const insertChapter = () => {
-    const chapterCount = getChapterCount() + 1;
-    const chapterHtml = `<section id="chapter${chapterCount}" data-title="Chapter ${chapterCount}"><p>Chapter content goes here...</p></section>`;
-    
+    const count = getElementCount('chapter') + 1;
+    const html = generateElementHtml('chapter', count);
     const chapterContext = getChapterContext();
     
-    if (chapterContext.isInChapter) {
-      // We're inside a chapter - insert after the current chapter
-      const insertPos = chapterContext.chapterStart + chapterContext.chapterSize;
-      
-      editor.chain()
-        .focus()
-        .insertContentAt(insertPos, chapterHtml)
-        .run();
+    if (chapterContext.found) {
+      // Insert after current chapter
+      const insertPos = chapterContext.start + chapterContext.size;
+      insertElement(html, insertPos);
     } else {
-      // We're not inside any chapter - insert at document end
+      // Insert at document end
       const { state } = editor;
       const endPos = state.doc.content.size;
-      
-      editor.chain()
-        .focus()
-        .insertContentAt(endPos, chapterHtml)
-        .run();
+      insertElement(html, endPos);
     }
   };
-  
-  // Add Part - only inserts inside chapters, never nested in other parts
+
+  // Insert Part - smart positioning within chapters
   const insertPart = () => {
     const chapterContext = getChapterContext();
     
-    if (!chapterContext.isInChapter) {
+    if (!chapterContext.found) {
       alert('Parts can only be added inside chapters. Please position your cursor inside a chapter first.');
       return;
     }
     
-    const partCount = getPartCount() + 1;
-    const partHtml = `<section id="part${partCount}" data-title="Part ${partCount}"><p>Part content goes here...</p></section>`;
+    const count = getElementCount('part') + 1;
+    const html = generateElementHtml('part', count);
     
     if (isInsidePart()) {
-      // We're inside a part - find the end of current part and insert after it
-      const { state } = editor;
-      let insertPos = state.selection.from;
-      
-      // Walk up to find the part we're in and get its end position
-      for (let i = state.selection.$from.depth; i > 0; i--) {
-        const node = state.selection.$from.node(i);
-        if (node.type.name === 'section' && i === 2) {
-          // Found the part we're in
-          const partStart = state.selection.$from.start(i);
-          const partSize = node.nodeSize;
-          insertPos = partStart + partSize - 1; // Insert after this part
-          break;
-        }
+      // Insert after current part
+      const insertPos = findElementEndPosition(2);
+      if (insertPos) {
+        insertElement(html, insertPos);
+      } else {
+        insertElement(html);
       }
-      
-      editor.chain()
-        .focus()
-        .insertContentAt(insertPos, partHtml)
-        .run();
     } else {
-      // We're in a chapter but not in a part - insert at current position
-      editor.chain()
-        .focus()
-        .insertContent(partHtml)
-        .run();
+      // Insert at current position within chapter
+      insertElement(html);
     }
   };
 
-  // Add Special Container - only inserts inside parts or other containers (sibling by default)
+  // Insert Container - smart sibling positioning
   const insertContainer = () => {
     if (!canInsertContainer()) {
       alert('Special containers can only be added inside parts or other containers. Please position your cursor inside a part or container first.');
       return;
     }
 
-    const containerCount = getContainerCount() + 1;
-    const containerHtml = `<div id="container${containerCount}" data-title="Container ${containerCount}"><p>Container content goes here...</p></div>`;
+    const count = getElementCount('container') + 1;
+    const html = generateElementHtml('container', count);
     
     if (isInsideContainer()) {
-      // We're inside a container - find the end of current container and insert after it (as sibling)
-      const { state } = editor;
-      let insertPos = state.selection.from;
-      
-      // Walk up to find the container we're in and get its end position
-      for (let i = state.selection.$from.depth; i > 0; i--) {
-        const node = state.selection.$from.node(i);
-        if (node.type.name === 'section' && node.attrs.tagName === 'div') {
-          // Found the container we're in
-          const containerStart = state.selection.$from.start(i);
-          const containerSize = node.nodeSize;
-          insertPos = containerStart + containerSize - 1; // Insert after this container
+      // Find the deepest container and insert after it
+      let insertPos = null;
+      for (let depth = 2; depth <= 6; depth++) { // Check reasonable depths
+        const pos = findElementEndPosition(depth, 'div');
+        if (pos) {
+          insertPos = pos;
           break;
         }
       }
       
-      editor.chain()
-        .focus()
-        .insertContentAt(insertPos, containerHtml)
-        .run();
+      if (insertPos) {
+        insertElement(html, insertPos);
+      } else {
+        insertElement(html);
+      }
     } else {
-      // We're in a part but not in a container - insert at current position
-      editor.chain()
-        .focus()
-        .insertContent(containerHtml)
-        .run();
+      // Insert at current position within part
+      insertElement(html);
     }
   };
 
-  // Add Nested Container - forces nesting inside current container
+  // Insert Nested Container - always nest at cursor
   const insertNestedContainer = () => {
     if (!canInsertContainer()) {
       alert('Special containers can only be added inside parts or other containers. Please position your cursor inside a part or container first.');
       return;
     }
 
-    const containerCount = getContainerCount() + 1;
-    const containerHtml = `<div id="container${containerCount}" data-title="Container ${containerCount}"><p>Container content goes here...</p></div>`;
-    
-    // Always insert at current position (will nest if inside container)
-    editor.chain()
-      .focus()
-      .insertContent(containerHtml)
-      .run();
+    const count = getElementCount('container') + 1;
+    const html = generateElementHtml('container', count);
+    insertElement(html);
   };
 
   return (
