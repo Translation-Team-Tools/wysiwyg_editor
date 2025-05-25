@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './ToolbatButton.module.css'
+import styles from './ToolbarButton.module.css'
 
 interface ToolbarButtonProps {
   onClick: () => void;
@@ -18,7 +18,7 @@ export const ToolbarButton: React.FC<ToolbarButtonProps> = ({
     <button
       onClick={onClick}
       title={title}
-      className={styles.button}
+      className={`${styles.button} ${isActive ? styles.active : ''}`}
       type="button"
     >
       {children}

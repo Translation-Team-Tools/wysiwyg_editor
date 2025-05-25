@@ -1,5 +1,5 @@
 .button {
-  padding: 0.5rem;
+  padding: 0.2rem 0.5rem;
   border-radius: 0.25rem;
   border: none;
   background: transparent;
@@ -12,5 +12,7 @@
 }
 
 .button.active {
-  background-color: #e5e7eb;
+  background-color: #f8fafc;
+  border-bottom: 3px solid #3b82f6;
+  color: #1e40af;
 }

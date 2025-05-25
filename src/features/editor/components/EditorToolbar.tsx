@@ -71,7 +71,6 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
 
     <ToolbarButton 
       onClick={clearTextFormatting}
-      isActive={hasTextFormatting}
       title='Reset formatting'
       >
       <RemoveFormatting size={18} />
