@@ -8,41 +8,6 @@ interface EditorToolbarProps {
   editor: Editor;
 }
 
-type ElementType = 'chapter' | 'part' | 'container';
-type TagName = 'section' | 'div';
-
-interface ElementConfig {
-  tagName: TagName;
-  idPrefix: string;
-  titlePrefix: string;
-  htmlPattern: RegExp;
-  contentPlaceholder: string;
-}
-
-const ELEMENT_CONFIGS: Record<ElementType, ElementConfig> = {
-  chapter: {
-    tagName: 'section',
-    idPrefix: 'chapter',
-    titlePrefix: 'Chapter',
-    htmlPattern: /<section[^>]*data-title="[^"]*"[^>]*>/g,
-    contentPlaceholder: 'Chapter content goes here...'
-  },
-  part: {
-    tagName: 'section',
-    idPrefix: 'part',
-    titlePrefix: 'Part',
-    htmlPattern: /<section[^>]*data-title="[^"]*"[^>]*>/g,
-    contentPlaceholder: 'Part content goes here...'
-  },
-  container: {
-    tagName: 'div',
-    idPrefix: 'container',
-    titlePrefix: 'Container',
-    htmlPattern: /<div[^>]*data-title="[^"]*"[^>]*>/g,
-    contentPlaceholder: 'Container content goes here...'
-  }
-};
-
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const toggleBold = () => editor.chain().focus().toggleBold().run();
   const toggleItalic = () => editor.chain().focus().toggleItalic().run();
@@ -55,166 +20,108 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
                           editor.isActive('heading', { level: 2 }) || 
                           editor.isActive('heading', { level: 3 });
 
-  // Generic function to count elements by type
-  const getElementCount = (type: ElementType): number => {
+  // Unified counting function
+  const getElementCount = (pattern: RegExp): number => {
     const html = editor.getHTML();
-    const matches = html.match(ELEMENT_CONFIGS[type].htmlPattern) || [];
-    return matches.length;
+    return (html.match(pattern) || []).length;
   };
 
-  // Generic function to generate HTML for any element
-  const generateElementHtml = (type: ElementType, count: number): string => {
-    const config = ELEMENT_CONFIGS[type];
-    const id = `${config.idPrefix}${count}`;
-    const title = `${config.titlePrefix} ${count}`;
-    return `<${config.tagName} id="${id}" data-title="${title}"><p>${config.contentPlaceholder}</p></${config.tagName}>`;
+  // Unified HTML generation
+  const createElementHtml = (tag: string, id: string, title: string, content: string): string => {
+    return `<${tag} id="${id}" data-title="${title}"><p>${content}</p></${tag}>`;
   };
 
-  // Generic function to find element context at specific depth
-  const getElementContext = (depth: number, tagName?: TagName): 
+  // Generic insertion helper
+  const insertAt = (html: string, position?: number) => {
+    const chain = editor.chain().focus();
+    position !== undefined ? chain.insertContentAt(position, html) : chain.insertContent(html);
+    chain.run();
+  };
+
+  // Helper to find element context at depth
+  const getElementAt = (depth: number, tagName?: string): 
     | { found: false }
-    | { found: true; start: number; end: number; size: number } => {
+    | { found: true; start: number; size: number } => {
     const { state } = editor;
     for (let i = state.selection.$from.depth; i > 0; i--) {
       const node = state.selection.$from.node(i);
-      const isMatch = node.type.name === 'section' && 
-                      i === depth && 
-                      (!tagName || node.attrs.tagName === tagName);
-      
-      if (isMatch) {
-        const start = state.selection.$from.start(i);
-        const end = state.selection.$from.end(i);
-        return {
-          found: true,
-          start: start - 1,
-          end: end - 1,
-          size: node.nodeSize
-        };
+      if (node.type.name === 'section' && i === depth && (!tagName || node.attrs.tagName === tagName)) {
+        const start = state.selection.$from.start(i) - 1;
+        return { found: true, start, size: node.nodeSize };
       }
     }
     return { found: false };
   };
 
-  // Generic function to find end position of current element at depth
-  const findElementEndPosition = (depth: number, tagName?: TagName): number | null => {
-    const { state } = editor;
-    for (let i = state.selection.$from.depth; i > 0; i--) {
-      const node = state.selection.$from.node(i);
-      const isMatch = node.type.name === 'section' && 
-                      i === depth && 
-                      (!tagName || node.attrs.tagName === tagName);
-      
-      if (isMatch) {
-        const start = state.selection.$from.start(i);
-        return start + node.nodeSize - 1;
-      }
-    }
-    return null;
+  // Helper to find end position of element at depth
+  const findEndAt = (depth: number, tagName?: string): number | undefined => {
+    const element = getElementAt(depth, tagName);
+    return element.found ? element.start + element.size : undefined;
   };
 
-  // Generic insertion helper
-  const insertElement = (html: string, position?: number) => {
-    const chain = editor.chain().focus();
-    if (position !== undefined) {
-      chain.insertContentAt(position, html);
-    } else {
-      chain.insertContent(html);
-    }
-    chain.run();
-  };
+  // Context checkers
+  const isInChapter = () => getElementAt(1).found;
+  const isInPart = () => getElementAt(2).found;
+  const isInContainer = () => getElementAt(2, 'div').found || getElementAt(3, 'div').found || getElementAt(4, 'div').found;
 
-  // Context checkers using generic helper
-  const getChapterContext = () => getElementContext(1);
-  const isInsidePart = () => getElementContext(2).found;
-  const isInsideContainer = () => getElementContext(2, 'div').found || getElementContext(3, 'div').found || getElementContext(4, 'div').found;
-  const canInsertContainer = () => isInsidePart() || isInsideContainer();
-
-  // Insert Chapter - smart positioning
+  // Insert Chapter
   const insertChapter = () => {
-    const count = getElementCount('chapter') + 1;
-    const html = generateElementHtml('chapter', count);
-    const chapterContext = getChapterContext();
+    const count = getElementCount(/<section[^>]*data-title="[^"]*"[^>]*>/g) + 1;
+    const html = createElementHtml('section', `chapter${count}`, `Chapter ${count}`, 'Chapter content goes here...');
     
-    if (chapterContext.found) {
-      // Insert after current chapter
-      const insertPos = chapterContext.start + chapterContext.size;
-      insertElement(html, insertPos);
-    } else {
-      // Insert at document end
-      const { state } = editor;
-      const endPos = state.doc.content.size;
-      insertElement(html, endPos);
-    }
+    const chapter = getElementAt(1);
+    const insertPos = chapter.found ? chapter.start + chapter.size : editor.state.doc.content.size;
+    insertAt(html, insertPos);
   };
 
-  // Insert Part - smart positioning within chapters
+  // Insert Part
   const insertPart = () => {
-    const chapterContext = getChapterContext();
-    
-    if (!chapterContext.found) {
+    if (!isInChapter()) {
       alert('Parts can only be added inside chapters. Please position your cursor inside a chapter first.');
       return;
     }
     
-    const count = getElementCount('part') + 1;
-    const html = generateElementHtml('part', count);
+    const count = getElementCount(/<section[^>]*data-title="[^"]*"[^>]*>/g) + 1;
+    const html = createElementHtml('section', `part${count}`, `Part ${count}`, 'Part content goes here...');
     
-    if (isInsidePart()) {
-      // Insert after current part
-      const insertPos = findElementEndPosition(2);
-      if (insertPos) {
-        insertElement(html, insertPos);
-      } else {
-        insertElement(html);
-      }
-    } else {
-      // Insert at current position within chapter
-      insertElement(html);
-    }
+    const insertPos = isInPart() ? findEndAt(2) : undefined;
+    insertAt(html, insertPos);
   };
 
-  // Insert Container - smart sibling positioning
+  // Insert Container (sibling)
   const insertContainer = () => {
-    if (!canInsertContainer()) {
+    if (!isInPart() && !isInContainer()) {
       alert('Special containers can only be added inside parts or other containers. Please position your cursor inside a part or container first.');
       return;
     }
 
-    const count = getElementCount('container') + 1;
-    const html = generateElementHtml('container', count);
+    const count = getElementCount(/<div[^>]*data-title="[^"]*"[^>]*>/g) + 1;
+    const html = createElementHtml('div', `container${count}`, `Container ${count}`, 'Container content goes here...');
     
-    if (isInsideContainer()) {
-      // Find the deepest container and insert after it
-      let insertPos = null;
-      for (let depth = 2; depth <= 6; depth++) { // Check reasonable depths
-        const pos = findElementEndPosition(depth, 'div');
-        if (pos) {
-          insertPos = pos;
-          break;
+    let insertPos: number | undefined = undefined;
+    if (isInContainer()) {
+      // Find deepest container and insert after it
+      for (let depth = 2; depth <= 5; depth++) {
+        const pos = findEndAt(depth, 'div');
+        if (pos !== undefined) { 
+          insertPos = pos; 
+          break; 
         }
       }
-      
-      if (insertPos) {
-        insertElement(html, insertPos);
-      } else {
-        insertElement(html);
-      }
-    } else {
-      // Insert at current position within part
-      insertElement(html);
     }
+    insertAt(html, insertPos);
   };
 
-  // Insert Nested Container - always nest at cursor
+  // Insert Nested Container
   const insertNestedContainer = () => {
-    if (!canInsertContainer()) {
+    if (!isInPart() && !isInContainer()) {
       alert('Special containers can only be added inside parts or other containers. Please position your cursor inside a part or container first.');
       return;
     }
 
-    const count = getElementCount('container') + 1;
-    const html = generateElementHtml('container', count);
-    insertElement(html);
+    const count = getElementCount(/<div[^>]*data-title="[^"]*"[^>]*>/g) + 1;
+    const html = createElementHtml('div', `container${count}`, `Container ${count}`, 'Container content goes here...');
+    insertAt(html);
   };
 
   return (
