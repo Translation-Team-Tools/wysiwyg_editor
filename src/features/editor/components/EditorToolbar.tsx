@@ -1,7 +1,7 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
 import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, BookOpen, FileText, Box, 
-  Square, Type, RemoveFormatting, List, ListOrdered } from 'lucide-react';
+  Square, Type, RemoveFormatting, List, ListOrdered, Image, Upload } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
 import styles from './EditorToolbar.module.css'
 
@@ -24,6 +24,42 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const isAnyHeadingActive = editor.isActive('heading', { level: 1 }) || 
                           editor.isActive('heading', { level: 2 }) || 
                           editor.isActive('heading', { level: 3 });
+
+  const insertImageFromFile = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const src = e.target?.result as string;
+          if (src) {
+            editor.chain().focus().setImage({ 
+              src,
+              alt: file.name.split('.')[0]
+            }).run();
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
+
+  const insertImageFromUrl = () => {
+    const url = prompt('Enter image URL:');
+    if (url && url.trim()) {
+      // Validate URL format (basic validation)
+      try {
+        new URL(url);
+        editor.chain().focus().setImage({ src: url.trim() }).run();
+      } catch {
+        alert('Please enter a valid URL');
+      }
+    }
+  };
 
   // Unified counting function
   const getElementCount = (pattern: RegExp): number => {
@@ -223,6 +259,22 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
         title="Numbered List"
       >
         <ListOrdered size={18} />
+      </ToolbarButton>
+      
+      <div className={styles.divider}></div>
+
+      <ToolbarButton 
+        onClick={insertImageFromUrl}
+        title="Insert Image from URL"
+      >
+        <Image size={18} />
+      </ToolbarButton>
+
+      <ToolbarButton 
+        onClick={insertImageFromFile}
+        title="Upload Image File"
+      >
+        <Upload size={18} />
       </ToolbarButton>
 
       <div className={styles.divider}></div>
