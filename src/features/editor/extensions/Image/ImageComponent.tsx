@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import type { NodeViewProps } from '@tiptap/react';
-import { X, RotateCcw, Edit3 } from 'lucide-react';
+import { X, RotateCcw, Edit3, ArrowDown } from 'lucide-react';
 import styles from './ImageComponent.module.css';
 
 interface ImageComponentProps extends NodeViewProps {
@@ -93,13 +93,29 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
     return src; // URL images returned as-is
   }, []);
 
+  // Helper function to add paragraph after image
+  const addParagraphAfter = useCallback(() => {
+    // Simple approach: just insert a paragraph at the current position
+    editor.chain()
+      .focus()
+      .insertContent('<p></p>')
+      .run();
+  }, [editor]);
+
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selected && !showEditInput) {
-        if (e.key === 'Delete' || e.key === 'Backspace') {
-          e.preventDefault();
-          handleDelete();
+        switch (e.key) {
+          case 'Delete':
+          case 'Backspace':
+            e.preventDefault();
+            handleDelete();
+            break;
+          case 'Enter':
+            e.preventDefault();
+            addParagraphAfter();
+            break;
         }
       }
     };
@@ -108,7 +124,7 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [selected, showEditInput, handleDelete]);
+  }, [selected, showEditInput, handleDelete, addParagraphAfter]);
 
   const imageStyles: React.CSSProperties = {
     width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
@@ -121,6 +137,7 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
     <NodeViewWrapper 
       className={`${styles.imageWrapper} ${selected ? styles.selected : ''}`}
       ref={containerRef}
+      data-drag-handle
     >
       <div className={styles.imageContainer}>
         {/* Loading State */}
@@ -191,7 +208,6 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
             onLoad={handleImageLoad}
             onError={handleImageError}
             className={styles.image}
-            data-drag-handle
           />
         )}
 
@@ -201,9 +217,19 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
             <button onClick={handleEditUrl} className={styles.toolbarButton} title="Edit URL">
               <Edit3 size={14} />
             </button>
+            <button onClick={addParagraphAfter} className={styles.toolbarButton} title="Add paragraph after">
+              <ArrowDown size={14} />
+            </button>
             <button onClick={handleDelete} className={styles.toolbarButton} title="Delete">
               <X size={14} />
             </button>
+          </div>
+        )}
+
+        {/* Hint text when selected */}
+        {selected && !isLoading && !hasError && !showEditInput && (
+          <div className={styles.selectionHint}>
+            Press Enter to add content after this image
           </div>
         )}
       </div>

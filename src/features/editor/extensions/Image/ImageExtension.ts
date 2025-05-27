@@ -44,6 +44,9 @@ export const ImageExtension = Node.create<ImageOptions>({
 
   draggable: true,
 
+  // Add these properties to handle cursor navigation
+  selectable: true,
+
   addAttributes() {
     return {
       src: {
