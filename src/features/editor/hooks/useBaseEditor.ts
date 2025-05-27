@@ -19,6 +19,22 @@ export const useBaseEditor = ({ content, onChange }: UseBaseEditorProps) => {
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
+    editorProps: {
+      handleKeyDown: (view, event): boolean => {
+        if (!editor) return false;
+        
+        if (event.key === 'Tab') {
+          if (editor.isActive('listItem')) {
+            if (event.shiftKey) {
+              return editor.chain().focus().liftListItem('listItem').run();
+            } else {
+              return editor.chain().focus().sinkListItem('listItem').run();
+            }
+          }
+        }
+        return false;
+      },
+    },
   });
 
   return editor;

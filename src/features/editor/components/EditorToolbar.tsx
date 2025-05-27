@@ -1,6 +1,7 @@
 import React from 'react';
 import { Editor } from '@tiptap/react';
-import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, BookOpen, FileText, Box, Square, Type, RemoveFormatting } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, BookOpen, FileText, Box, 
+  Square, Type, RemoveFormatting, List, ListOrdered } from 'lucide-react';
 import { ToolbarButton } from './ToolbarButton';
 import styles from './EditorToolbar.module.css'
 
@@ -15,6 +16,10 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   const clearTextFormatting = () => editor.chain().focus().unsetAllMarks().run();
   const toggleParagraph = () => editor.chain().focus().setParagraph().run();
   const toggleHeading = (level: 1 | 2 | 3) => editor.chain().focus().toggleHeading({ level }).run();
+  const toggleBulletList = () => editor.chain().focus().toggleBulletList().run();
+  const toggleOrderedList = () => editor.chain().focus().toggleOrderedList().run();
+  const sinkListItem = () => editor.chain().focus().sinkListItem('listItem').run();
+  const liftListItem = () => editor.chain().focus().liftListItem('listItem').run();
 
   const isAnyHeadingActive = editor.isActive('heading', { level: 1 }) || 
                           editor.isActive('heading', { level: 2 }) || 
@@ -200,6 +205,24 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
         title="Heading 3"
       >
         <Heading3 size={18} />
+      </ToolbarButton>
+
+      <div className={styles.divider}></div>
+
+      <ToolbarButton 
+        onClick={toggleBulletList}
+        isActive={editor.isActive('bulletList')}
+        title="Bullet List"
+      >
+        <List size={18} />
+      </ToolbarButton>
+
+      <ToolbarButton 
+        onClick={toggleOrderedList}
+        isActive={editor.isActive('orderedList')}
+        title="Numbered List"
+      >
+        <ListOrdered size={18} />
       </ToolbarButton>
 
       <div className={styles.divider}></div>
