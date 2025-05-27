@@ -25,28 +25,31 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
                           editor.isActive('heading', { level: 2 }) || 
                           editor.isActive('heading', { level: 3 });
 
-  const insertImageFromFile = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const src = e.target?.result as string;
-          if (src) {
+    const insertImageFromFile = () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const base64Data = e.target?.result as string;
+            
+            // Store in localStorage with filename as key
+            localStorage.setItem(`image_${file.name}`, base64Data);
+            
+            // Insert with filename reference
             editor.chain().focus().setImage({ 
-              src,
+              src: `local:${file.name}`,
               alt: file.name.split('.')[0]
             }).run();
-          }
-        };
-        reader.readAsDataURL(file);
-      }
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
     };
-    input.click();
-  };
 
   const insertImageFromUrl = () => {
     const url = prompt('Enter image URL:');

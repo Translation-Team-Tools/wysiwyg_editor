@@ -34,8 +34,14 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
   }, []);
 
   const handleDelete = useCallback(() => {
+    // Get filename from src
+    if (node.attrs.src.startsWith('local:')) {
+      const filename = node.attrs.src.replace('local:', '');
+      localStorage.removeItem(`image_${filename}`);
+    }
+    
     deleteNode();
-  }, [deleteNode]);
+  }, [deleteNode, node.attrs.src]);
 
   const handleRetry = useCallback(() => {
     setIsLoading(true);
@@ -51,20 +57,41 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
     setEditUrl(node.attrs.src || '');
   }, [node.attrs.src]);
 
-  const handleUrlSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (editUrl.trim()) {
-      updateAttributes({ src: editUrl.trim() });
-      setShowEditInput(false);
-      setIsLoading(true);
-      setHasError(false);
+const handleUrlSubmit = useCallback((e: React.FormEvent) => {
+  e.preventDefault();
+  if (editUrl.trim()) {
+    let finalUrl = editUrl.trim();
+    
+    // If it's a local reference, validate the file exists
+    if (finalUrl.startsWith('local:')) {
+      const filename = finalUrl.replace('local:', '');
+      const exists = localStorage.getItem(`image_${filename}`);
+      if (!exists) {
+        alert(`Local file "${filename}" not found`);
+        return;
+      }
     }
-  }, [editUrl, updateAttributes]);
+    
+    updateAttributes({ src: finalUrl });
+    setShowEditInput(false);
+    setIsLoading(true);
+    setHasError(false);
+  }
+}, [editUrl, updateAttributes]);
 
   const handleUrlCancel = useCallback(() => {
     setShowEditInput(false);
     setEditUrl(node.attrs.src || '');
   }, [node.attrs.src]);
+
+  const resolveImageSrc = useCallback((src: string): string => {
+    if (src.startsWith('local:')) {
+      const filename = src.replace('local:', '');
+      const base64Data = localStorage.getItem(`image_${filename}`);
+      return base64Data || src; // Return base64 or fallback to original
+    }
+    return src; // URL images returned as-is
+  }, []);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -157,7 +184,7 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
         {!hasError && (
           <img
             ref={imageRef}
-            src={node.attrs.src}
+            src={resolveImageSrc(node.attrs.src)} // Resolve here for display
             alt={node.attrs.alt || ''}
             title={node.attrs.title || ''}
             style={imageStyles}
