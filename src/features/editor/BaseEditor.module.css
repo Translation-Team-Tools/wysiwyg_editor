@@ -35,3 +35,30 @@
 .content :global(.ProseMirror p) {
   margin-bottom: 0.75rem;
 }
+
+/* Basic list styling */
+.content ul,
+.content ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.content ul ul,
+.content ol ol,
+.content ul ol,
+.content ol ul {
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.content li {
+  margin: 0.25rem 0;
+}
+
+.content ul ul {
+  list-style-type: circle;
+}
+
+.content ul ul ul {
+  list-style-type: square;
+}
