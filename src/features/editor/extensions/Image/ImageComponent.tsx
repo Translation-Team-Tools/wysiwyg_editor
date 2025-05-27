@@ -164,7 +164,7 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
             onLoad={handleImageLoad}
             onError={handleImageError}
             className={styles.image}
-            draggable={false}
+            data-drag-handle
           />
         )}
 
