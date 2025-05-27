@@ -258,26 +258,3 @@
   background-color: #fef2f2;
   color: #dc2626;
 }
-
-/* Resize Handle */
-.resizeHandle {
-  position: absolute;
-  bottom: -4px;
-  right: -4px;
-  width: 12px;
-  height: 12px;
-  background-color: #3b82f6;
-  border: 2px solid white;
-  border-radius: 50%;
-  cursor: nw-resize;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.imageWrapper.selected .resizeHandle {
-  opacity: 1;
-}
-
-.resizeHandle:hover {
-  background-color: #2563eb;
-}

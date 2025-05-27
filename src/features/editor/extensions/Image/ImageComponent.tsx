@@ -17,7 +17,6 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
   const [showEditInput, setShowEditInput] = useState(false);
   const [editUrl, setEditUrl] = useState(node.attrs.src || '');
   
@@ -67,40 +66,6 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
     setEditUrl(node.attrs.src || '');
   }, [node.attrs.src]);
 
-  // Handle mouse events for resizing
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.target === containerRef.current || e.target === imageRef.current) {
-      e.preventDefault();
-      setIsResizing(true);
-      
-      const startX = e.clientX;
-      const startY = e.clientY;
-      const startWidth = imageRef.current?.offsetWidth || 0;
-      const startHeight = imageRef.current?.offsetHeight || 0;
-      const aspectRatio = startWidth / startHeight;
-
-      const handleMouseMove = (e: MouseEvent) => {
-        const deltaX = e.clientX - startX;
-        const newWidth = Math.max(100, startWidth + deltaX);
-        const newHeight = newWidth / aspectRatio;
-        
-        updateAttributes({
-          width: Math.round(newWidth),
-          height: Math.round(newHeight),
-        });
-      };
-
-      const handleMouseUp = () => {
-        setIsResizing(false);
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-  }, [updateAttributes]);
-
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -127,7 +92,7 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
 
   return (
     <NodeViewWrapper 
-      className={`${styles.imageWrapper} ${selected ? styles.selected : ''} ${isResizing ? styles.resizing : ''}`}
+      className={`${styles.imageWrapper} ${selected ? styles.selected : ''}`}
       ref={containerRef}
     >
       <div className={styles.imageContainer}>
@@ -198,7 +163,6 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
             style={imageStyles}
             onLoad={handleImageLoad}
             onError={handleImageError}
-            onMouseDown={selected ? handleMouseDown : undefined}
             className={styles.image}
             draggable={false}
           />
@@ -214,11 +178,6 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
               <X size={14} />
             </button>
           </div>
-        )}
-
-        {/* Resize Handle */}
-        {selected && !isLoading && !hasError && !showEditInput && (
-          <div className={styles.resizeHandle} />
         )}
       </div>
     </NodeViewWrapper>
