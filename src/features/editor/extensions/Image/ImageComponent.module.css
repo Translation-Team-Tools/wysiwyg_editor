@@ -1,0 +1,316 @@
+/* Image Wrapper */
+.imageWrapper {
+  position: relative;
+  display: block;
+  margin: 1rem 0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.imageWrapper:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.imageWrapper.selected {
+  box-shadow: 0 0 0 2px #3b82f6;
+  border-radius: 8px;
+}
+
+.imageWrapper.resizing {
+  cursor: nw-resize;
+}
+
+/* Image Container */
+.imageContainer {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* Image */
+.image {
+  border-radius: 6px;
+  object-fit: contain;
+  transition: opacity 0.2s ease;
+}
+
+.image:hover {
+  opacity: 0.95;
+}
+
+/* Loading State */
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.loadingSpinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  border: 2px dashed #fca5a5;
+  border-radius: 8px;
+  background-color: #fef2f2;
+}
+
+.errorContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.errorText {
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.errorActions {
+  display: flex;
+  gap: 8px;
+}
+
+.retryButton,
+.editButton,
+.deleteButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retryButton {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.retryButton:hover {
+  background-color: #2563eb;
+}
+
+.editButton {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.editButton:hover {
+  background-color: #d97706;
+}
+
+.deleteButton {
+  background-color: #dc2626;
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #b91c1c;
+}
+
+/* Edit URL Input */
+.editContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 300px;
+}
+
+.editInput {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.editInput:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.saveButton,
+.cancelButton {
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.saveButton {
+  background-color: #10b981;
+  color: white;
+}
+
+.saveButton:hover {
+  background-color: #059669;
+}
+
+.cancelButton {
+  background-color: #6b7280;
+  color: white;
+}
+
+.cancelButton:hover {
+  background-color: #4b5563;
+}
+
+/* Selection Toolbar */
+.toolbar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: all 0.2s ease;
+}
+
+.imageWrapper.selected .toolbar {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toolbarButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolbarButton:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.toolbarButton:last-child {
+  color: #dc2626;
+}
+
+.toolbarButton:last-child:hover {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+/* Resize Handle */
+.resizeHandle {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  background-color: #3b82f6;
+  border: 2px solid white;
+  border-radius: 50%;
+  cursor: nw-resize;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease;
+}
+
+.imageWrapper.selected .resizeHandle {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.resizeHandle:hover {
+  transform: scale(1.2);
+  background-color: #2563eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .editForm {
+    min-width: 250px;
+    margin: 0 16px;
+  }
+  
+  .toolbar {
+    position: static;
+    margin-top: 8px;
+    justify-content: center;
+    opacity: 1;
+    transform: none;
+  }
+  
+  .resizeHandle {
+    display: none;
+  }
+}

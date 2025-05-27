@@ -2,6 +2,7 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { SectionExtension } from '../extensions';
+import { ImageExtension } from '../extensions';
 
 interface UseBaseEditorProps {
   content: string;
@@ -14,6 +15,7 @@ export const useBaseEditor = ({ content, onChange }: UseBaseEditorProps) => {
       StarterKit,
       Underline,
       SectionExtension,
+      ImageExtension,
     ],
     content,
     onUpdate: ({ editor }) => {
