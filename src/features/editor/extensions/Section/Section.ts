@@ -31,7 +31,7 @@ export const SectionExtension = Node.create<SectionOptions>({
 
   group: 'block',
 
-  content: 'block*',
+  content: 'block+',
 
   defining: true,
 
