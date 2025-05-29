@@ -13,7 +13,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 8px;
+  padding: 4px;
   background: transparent;
   border-bottom: 1px solid #f8f9fa;
   user-select: none;
