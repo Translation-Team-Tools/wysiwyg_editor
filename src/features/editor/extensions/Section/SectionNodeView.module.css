@@ -131,6 +131,54 @@
   border-color: #adb5bd;
 }
 
+.exitHint {
+  font-size: 0.7rem;
+  color: #6c757d;
+  font-style: italic;
+  opacity: 0;
+  transition: opacity 0.2s;
+  margin-left: auto;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.sectionHeader:hover .exitHint {
+  opacity: 0.7;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.exitButton {
+  padding: 6px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #28a745;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s;
+  width: 28px;
+  height: 28px;
+}
+
+.sectionHeader:hover .exitButton {
+  opacity: 0.6;
+}
+
+.exitButton:hover {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  opacity: 1 !important;
+  transform: scale(1.1);
+}
+
 .deleteButton {
   padding: 6px;
   border: none;
@@ -212,5 +260,9 @@
   
   .sectionContent {
     padding: 6px 8px;
+  }
+  
+  .exitHint {
+    display: none; /* Hide hint on mobile to save space */
   }
 }

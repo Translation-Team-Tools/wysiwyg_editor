@@ -1,5 +1,6 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
+import { TextSelection } from '@tiptap/pm/state';
 import { SectionNodeView } from './SectionNodeView';
 
 export interface SectionOptions {
@@ -14,6 +15,7 @@ declare module '@tiptap/core' {
         title?: string; 
         tagName?: 'section' | 'div';
       }) => ReturnType;
+      exitSection: () => ReturnType;
     };
   }
 }
@@ -31,11 +33,11 @@ export const SectionExtension = Node.create<SectionOptions>({
 
   group: 'block',
 
-  content: 'block*',  // Changed from 'block+' to 'block*' to allow empty sections
+  content: 'block*',
 
   defining: true,
 
-  isolating: true,    // Prevents unwanted splitting
+  isolating: true,
 
   addAttributes() {
     return {
@@ -69,7 +71,6 @@ export const SectionExtension = Node.create<SectionOptions>({
           return element.tagName.toLowerCase() === 'div' ? 'div' : 'section';
         },
         renderHTML: attributes => {
-          // This attribute is used internally but not rendered to HTML
           return {};
         },
       },
@@ -119,77 +120,169 @@ export const SectionExtension = Node.create<SectionOptions>({
           
           return commands.insertContent(html);
         },
+      
+      exitSection: () => ({ tr, state, dispatch }) => {
+        const { selection } = state;
+        const { $from } = selection;
+        
+        // Find the section node we're inside
+        let sectionDepth = -1;
+        let sectionPos = -1;
+        
+        for (let depth = $from.depth; depth > 0; depth--) {
+          const node = $from.node(depth);
+          if (node.type.name === 'section') {
+            sectionDepth = depth;
+            sectionPos = $from.start(depth) - 1;
+            break;
+          }
+        }
+        
+        if (sectionDepth === -1) return false;
+        
+        // Get the section node to calculate its end position
+        const sectionNode = $from.node(sectionDepth);
+        const sectionEndPos = sectionPos + sectionNode.nodeSize;
+        
+        // Create a new paragraph after the section
+        const paragraph = state.schema.nodes.paragraph.create();
+        
+        if (dispatch) {
+          tr.insert(sectionEndPos, paragraph);
+          const newPos = sectionEndPos + 1;
+          const $newPos = tr.doc.resolve(newPos);
+          tr.setSelection(TextSelection.near($newPos));
+          dispatch(tr);
+        }
+        
+        return true;
+      },
     };
   },
 
   addKeyboardShortcuts() {
+    // Helper function to determine section type
+    const getSectionType = (sectionNode: any) => {
+      const title = (sectionNode.attrs.title || '').toLowerCase();
+      if (title.startsWith('chapter')) return 'chapter';
+      if (title.startsWith('part')) return 'part';
+      if (title.startsWith('container')) return 'container';
+      return 'section';
+    };
+
     return {
       'Mod-Shift-s': () => this.editor.commands.setSection({ tagName: 'section' }),
       'Mod-Shift-d': () => this.editor.commands.setSection({ tagName: 'div' }),
       
-      // Custom Enter handling to prevent unwanted exits
       'Enter': ({ editor }) => {
         const { state } = editor;
         const { selection } = state;
         const { $from } = selection;
         
-        // Check if we're in a section
-        const section = $from.node(-1);
-        if (section.type.name === 'section') {
-          // Check if current paragraph is empty
-          const currentParagraph = $from.parent;
-          if (currentParagraph.type.name === 'paragraph' && currentParagraph.content.size === 0) {
-            // Check if this is the second consecutive empty paragraph
+        // Find if we're in a section
+        let sectionNode = null;
+        for (let depth = $from.depth; depth > 0; depth--) {
+          const node = $from.node(depth);
+          if (node.type.name === 'section') {
+            sectionNode = node;
+            break;
+          }
+        }
+        
+        if (!sectionNode) return false;
+        
+        const sectionType = getSectionType(sectionNode);
+        
+        // Check if current paragraph is empty
+        const currentParagraph = $from.parent;
+        if (currentParagraph.type.name === 'paragraph' && currentParagraph.content.size === 0) {
+          
+          if (sectionType === 'container') {
+            // For containers: double Enter to exit
             const prevNode = $from.nodeBefore;
             if (prevNode && prevNode.type.name === 'paragraph' && prevNode.content.size === 0) {
-              // Exit the section only if user explicitly wants to (triple Enter)
-              const beforePrevNode = state.doc.resolve($from.pos - prevNode.nodeSize - 1).nodeBefore;
-              if (beforePrevNode && beforePrevNode.type.name === 'paragraph' && beforePrevNode.content.size === 0) {
-                // Triple enter - exit the section
-                return editor.commands.exitCode();
+              return editor.commands.exitSection();
+            }
+          } else if (sectionType === 'chapter' || sectionType === 'part') {
+            // For chapters and parts: triple Enter to exit
+            const prevNode = $from.nodeBefore;
+            if (prevNode && prevNode.type.name === 'paragraph' && prevNode.content.size === 0) {
+              const prevPrevPos = $from.pos - prevNode.nodeSize - 1;
+              if (prevPrevPos > 0) {
+                const beforePrevNode = state.doc.resolve(prevPrevPos).nodeBefore;
+                if (beforePrevNode && beforePrevNode.type.name === 'paragraph' && beforePrevNode.content.size === 0) {
+                  return editor.commands.exitSection();
+                }
               }
+            }
+          } else {
+            // For regular sections: double Enter to exit
+            const prevNode = $from.nodeBefore;
+            if (prevNode && prevNode.type.name === 'paragraph' && prevNode.content.size === 0) {
+              return editor.commands.exitSection();
             }
           }
         }
         
-        // Default behavior for normal Enter
         return false;
       },
       
-      // Allow explicit exit with Mod+Enter
       'Mod-Enter': ({ editor }) => {
         const { state } = editor;
         const { selection } = state;
         const { $from } = selection;
         
         // Check if we're in a section
-        const section = $from.node(-1);
-        if (section.type.name === 'section') {
-          return editor.commands.exitCode();
+        for (let depth = $from.depth; depth > 0; depth--) {
+          const node = $from.node(depth);
+          if (node.type.name === 'section') {
+            return editor.commands.exitSection();
+          }
         }
         
         return false;
       },
       
-      // Handle backspace at the beginning of empty sections
+      'Shift-Enter': ({ editor }) => {
+        const { state } = editor;
+        const { selection } = state;
+        const { $from } = selection;
+        
+        // Find if we're in a section
+        for (let depth = $from.depth; depth > 0; depth--) {
+          const node = $from.node(depth);
+          if (node.type.name === 'section') {
+            const sectionType = getSectionType(node);
+            
+            // Allow Shift+Enter to exit containers easily
+            if (sectionType === 'container') {
+              return editor.commands.exitSection();
+            }
+            break;
+          }
+        }
+        
+        return false;
+      },
+      
       'Backspace': ({ editor }) => {
         const { state } = editor;
         const { selection } = state;
         const { $from } = selection;
         
-        // Only handle if cursor is at the very beginning of a paragraph in a section
         if ($from.parentOffset === 0) {
-          const section = $from.node(-1);
-          if (section.type.name === 'section') {
-            const currentParagraph = $from.parent;
-            // If it's an empty paragraph and it's the only content in the section
-            if (currentParagraph.type.name === 'paragraph' && 
-                currentParagraph.content.size === 0 && 
-                section.content.size <= 2) { // Empty paragraph has size ~2
-              // Remove the entire section
-              const sectionPos = $from.pos - $from.parentOffset - 1;
-              editor.commands.deleteRange({ from: sectionPos, to: sectionPos + section.nodeSize });
-              return true;
+          for (let depth = $from.depth; depth > 0; depth--) {
+            const node = $from.node(depth);
+            if (node.type.name === 'section') {
+              const currentParagraph = $from.parent;
+              if (currentParagraph.type.name === 'paragraph' && 
+                  currentParagraph.content.size === 0 && 
+                  node.content.size <= 2) {
+                const sectionPos = $from.start(depth) - 1;
+                editor.commands.deleteRange({ from: sectionPos, to: sectionPos + node.nodeSize });
+                return true;
+              }
+              break;
             }
           }
         }
