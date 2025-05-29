@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
+import { Copy } from 'lucide-react';
 import BaseEditor from './features/editor';
 import { useEditorContent } from './shared/hooks/useEditorContent.ts';
 import styles from './App.module.css';
@@ -9,6 +10,7 @@ const App: React.FC = () => {
   // Panel widths state
   const [leftPanelWidth, setLeftPanelWidth] = useState(250);
   const [rightPanelWidth, setRightPanelWidth] = useState(400);
+  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   
   // Refs for tracking drag state
   const isDraggingLeft = useRef(false);
@@ -56,6 +58,27 @@ const App: React.FC = () => {
     isDraggingLeft.current = false;
     isDraggingRight.current = false;
   }, []);
+
+  // Handle copying HTML output
+  const handleCopyHtml = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(formattedHtml);
+      setShowCopiedMessage(true);
+      setTimeout(() => setShowCopiedMessage(false), 1000);
+      console.log('HTML copied to clipboard');
+    } catch (err) {
+      console.error('Failed to copy HTML:', err);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = formattedHtml;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setShowCopiedMessage(true);
+      setTimeout(() => setShowCopiedMessage(false), 1000);
+    }
+  }, [formattedHtml]);
 
   // Add event listeners for mouse events
   React.useEffect(() => {
@@ -130,9 +153,23 @@ const App: React.FC = () => {
           <h2 className={styles.htmlOutputTitle}>HTML Output</h2>
         </div>
         <div className={styles.outputContent}>
-          <pre className={styles.htmlOutputCode}>
-            {formattedHtml}
-          </pre>
+          <div className={styles.htmlOutputContainer}>
+            <button 
+              className={styles.copyButton}
+              onClick={handleCopyHtml}
+              title="Copy to clipboard"
+            >
+              <Copy size={16} />
+            </button>
+            {showCopiedMessage && (
+              <div className={styles.copiedMessage}>
+                Copied!
+              </div>
+            )}
+            <pre className={styles.htmlOutputCode}>
+              {formattedHtml}
+            </pre>
+          </div>
         </div>
       </div>
     </div>

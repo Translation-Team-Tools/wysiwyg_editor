@@ -134,6 +134,81 @@
   flex: 1;
   overflow: auto;
   padding: 1rem;
+  position: relative;
+}
+
+.htmlOutputContainer {
+  position: relative;
+  height: 100%;
+}
+
+.copyButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s, border-color 0.2s;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.copyButton:hover {
+  background-color: #f8f9fa;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.copyButton:active {
+  background-color: #e9ecef;
+  transform: translateY(1px);
+}
+
+.htmlOutputContainer:hover .copyButton {
+  opacity: 1;
+}
+
+.copiedMessage {
+  position: absolute;
+  top: 0.5rem;
+  right: 3rem;
+  background-color: #7a867d;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  z-index: 15;
+  animation: fadeInOut 2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
 }
 
 .htmlOutputCode {
