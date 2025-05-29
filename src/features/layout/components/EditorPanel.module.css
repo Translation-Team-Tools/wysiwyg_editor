@@ -1,0 +1,29 @@
+/* src/features/layout/components/EditorPanel.module.css */
+.editorPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 400px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.header {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #ffffff;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+  color: #343a40;
+}
+
+.editorContent {
+  flex: 1;
+  padding: 1rem;
+  overflow: auto;
+  background-color: #ffffff;
+}

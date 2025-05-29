@@ -1,0 +1,43 @@
+/* src/features/layout/components/OutputPanel.module.css */
+.outputPanel {
+  min-width: 300px;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.header {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #ffffff;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #343a40;
+}
+
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+  position: relative;
+}
+
+.outputContainer {
+  position: relative;
+  height: 100%;
+}
+
+.codeContainer {
+  position: relative;
+  height: 100%;
+}
+
+.codeContainer:hover .copyButton {
+  opacity: 1;
+}

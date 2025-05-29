@@ -1,0 +1,17 @@
+/* src/features/layout/components/ResizeHandle.module.css */
+.resizeHandle {
+  width: 4px;
+  background-color: #e9ecef;
+  cursor: col-resize;
+  transition: background-color 0.2s;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.resizeHandle:hover {
+  background-color: #007bff;
+}
+
+.resizeHandle:active {
+  background-color: #0056b3;
+}

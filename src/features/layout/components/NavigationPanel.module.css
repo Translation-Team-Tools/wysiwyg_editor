@@ -1,0 +1,56 @@
+/* src/features/layout/components/NavigationPanel.module.css */
+.navigationPanel {
+  min-width: 200px;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.header {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #ffffff;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #343a40;
+}
+
+.navigation {
+  flex: 1;
+  padding: 1rem 0;
+}
+
+.navList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navItem {
+  margin: 0;
+}
+
+.navLink {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #495057;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.navLink:hover {
+  background-color: #e9ecef;
+  color: #212529;
+}
+
+.navLink:focus {
+  background-color: #dee2e6;
+  color: #212529;
+  outline: none;
+}
