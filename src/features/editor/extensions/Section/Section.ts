@@ -51,13 +51,13 @@ export const SectionExtension = Node.create<SectionOptions>({
       },
       title: {
         default: 'Untitled',
-        parseHTML: element => element.getAttribute('data-title'),
+        parseHTML: element => element.getAttribute('data-toc-title'),
         renderHTML: attributes => {
           if (!attributes.title) {
             return {};
           }
           return {
-            'data-title': attributes.title,
+            'data-toc-title': attributes.title,
           };
         },
       },
@@ -77,10 +77,10 @@ export const SectionExtension = Node.create<SectionOptions>({
   parseHTML() {
     return [
       {
-        tag: 'section[data-title]',
+        tag: 'section[data-toc-title]',
       },
       {
-        tag: 'div[data-title]',
+        tag: 'div[data-toc-title]',
       },
     ];
   },
@@ -113,7 +113,7 @@ export const SectionExtension = Node.create<SectionOptions>({
           } = attributes || {};
           
           const htmlTagName = tagName === 'div' ? 'div' : 'section';
-          const html = `<${htmlTagName} id="${id}" data-title="${title}"><p>Content goes here...</p></${htmlTagName}>`;
+          const html = `<${htmlTagName} id="${id}" data-toc-title="${title}"><p>Content goes here...</p></${htmlTagName}>`;
           
           return commands.insertContent(html);
         },

@@ -72,7 +72,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
 
   // Unified HTML generation
   const createElementHtml = (tag: string, id: string, title: string, content: string): string => {
-    return `<${tag} id="${id}" data-title="${title}"><p>${content}</p></${tag}>`;
+    return `<${tag} id="${id}" data-toc-title="${title}"><p>${content}</p></${tag}>`;
   };
 
   // Generic insertion helper
@@ -122,7 +122,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
 
   // Insert Chapter
   const insertChapter = () => {
-    const count = getElementCount(/<section[^>]*data-title="[^"]*"[^>]*>/g) + 1;
+    const count = getElementCount(/<section[^>]*data-toc-title="[^"]*"[^>]*>/g) + 1;
     const html = createElementHtml('section', `chapter${count}`, `Chapter ${count}`, 'Chapter content goes here...');
     
     const chapter = getElementAt(1);
@@ -137,7 +137,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
       return;
     }
     
-    const count = getElementCount(/<section[^>]*data-title="[^"]*"[^>]*>/g) + 1;
+    const count = getElementCount(/<section[^>]*data-toc-title="[^"]*"[^>]*>/g) + 1;
     const html = createElementHtml('section', `part${count}`, `Part ${count}`, 'Part content goes here...');
     
     const insertPos = isInPart() ? findEndAt(2) : undefined;
@@ -151,7 +151,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
       return;
     }
 
-    const count = getElementCount(/<div[^>]*data-title="[^"]*"[^>]*>/g) + 1;
+    const count = getElementCount(/<div[^>]*data-toc-title="[^"]*"[^>]*>/g) + 1;
     const html = createElementHtml('div', `container${count}`, `Container ${count}`, 'Container content goes here...');
     
     let insertPos: number | undefined = undefined;
@@ -172,7 +172,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
       return;
     }
 
-    const count = getElementCount(/<div[^>]*data-title="[^"]*"[^>]*>/g) + 1;
+    const count = getElementCount(/<div[^>]*data-toc-title="[^"]*"[^>]*>/g) + 1;
     const html = createElementHtml('div', `container${count}`, `Container ${count}`, 'Container content goes here...');
     insertAt(html);
   };
