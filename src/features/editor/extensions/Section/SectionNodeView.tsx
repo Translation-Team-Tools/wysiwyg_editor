@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import { X } from 'lucide-react';
 import styles from './SectionNodeView.module.css';
@@ -18,6 +18,24 @@ export const SectionNodeView: React.FC<SectionNodeViewProps> = ({
   const [isEditingId, setIsEditingId] = useState(false);
   const titleRef = useRef<HTMLSpanElement>(null);
   const idRef = useRef<HTMLSpanElement>(null);
+
+  // Determine section level and type based on title
+  const sectionInfo = useMemo(() => {
+    const title = (node.attrs.title || 'Untitled').toLowerCase();
+    
+    if (title.startsWith('chapter')) {
+      return { level: 1, type: 'chapter', color: '#8cc8ff' };
+    } else if (title.startsWith('part')) {
+      return { level: 2, type: 'part', color: '#8ce99a' };
+    } else if (title.startsWith('container')) {
+      return { level: 3, type: 'container', color: '#ffe066' };
+    } else if (title.startsWith('section')) {
+      return { level: 4, type: 'section', color: '#ffb3d9' };
+    } else {
+      // Default for custom sections
+      return { level: 1, type: 'custom', color: '#8cc8ff' };
+    }
+  }, [node.attrs.title]);
 
   const handleTitleDoubleClick = () => {
     setIsEditingTitle(true);
@@ -111,7 +129,7 @@ export const SectionNodeView: React.FC<SectionNodeViewProps> = ({
   };
 
   const handleDelete = () => {
-    if (window.confirm('Delete this section?')) {
+    if (window.confirm(`Delete this ${sectionInfo.type}?`)) {
       deleteNode();
     }
   };
@@ -122,7 +140,14 @@ export const SectionNodeView: React.FC<SectionNodeViewProps> = ({
   };
 
   return (
-    <NodeViewWrapper className={styles.sectionWrapper}>
+    <NodeViewWrapper 
+      className={styles.sectionWrapper}
+      data-level={sectionInfo.level}
+      data-type={sectionInfo.type}
+      style={{
+        '--section-color': sectionInfo.color
+      } as React.CSSProperties}
+    >
       <div 
         className={styles.sectionHeader}
         contentEditable={false} // Prevent TipTap from interfering
@@ -162,7 +187,7 @@ export const SectionNodeView: React.FC<SectionNodeViewProps> = ({
         <button 
           onClick={handleDelete} 
           className={styles.deleteButton}
-          title="Delete"
+          title={`Delete ${sectionInfo.type}`}
           onMouseDown={(e) => e.stopPropagation()} // Prevent TipTap interference
         >
           <X size={14} />

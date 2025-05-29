@@ -1,101 +1,216 @@
 .sectionWrapper {
   border: 1px solid #f1f3f5;
-  border-radius: 3px;
+  border-radius: 4px;
   margin: 4px 0;
   background: transparent;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
 }
 
 .sectionWrapper:hover {
   border-color: #e9ecef;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* Different styling for different section levels */
+.sectionWrapper[data-level="1"] {
+  border-left: 3px solid #8cc8ff;
+  margin: 6px 0;
+}
+
+.sectionWrapper[data-level="2"] {
+  border-left: 3px solid #8ce99a;
+  margin: 4px 0 4px 2px;
+}
+
+.sectionWrapper[data-level="3"] {
+  border-left: 3px solid #ffe066;
+  margin: 4px 0 4px 6px;
+}
+
+.sectionWrapper[data-level="4"] {
+  border-left: 3px solid #ffb3d9;
+  margin: 4px 0 4px 12px;
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px;
+  padding: 6px 10px;
   background: transparent;
   border-bottom: 1px solid #f8f9fa;
   user-select: none;
+  min-height: 36px;
 }
 
 .sectionHeader:hover {
-  background: rgba(248, 249, 250, 0.5);
+  background: rgba(248, 249, 250, 0.6);
 }
 
 .displayMode {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
 }
 
 .title {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  min-width: 60px;
+}
+
+/* Different title styles for different levels */
+.sectionWrapper[data-level="1"] .title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #343a40;
+}
+
+.sectionWrapper[data-level="2"] .title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.sectionWrapper[data-level="3"] .title {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.sectionWrapper[data-level="4"] .title {
+  font-size: 0.85rem;
   font-weight: 500;
   color: #6c757d;
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 1px 3px;
-  border-radius: 2px;
-  transition: all 0.2s;
 }
 
 .title:hover {
   background: rgba(0, 102, 204, 0.08);
-  color: #495057;
+  color: #0066cc;
+  transform: translateY(-1px);
 }
 
 .titleEditing {
-  background: rgba(0, 102, 204, 0.1) !important;
-  outline: 1px solid #0066cc;
+  background: rgba(0, 102, 204, 0.12) !important;
+  outline: 2px solid #0066cc;
   cursor: text;
   color: #343a40;
+  transform: none;
 }
 
 .id {
   font-size: 0.75rem;
   color: #adb5bd;
   font-weight: normal;
-  font-family: monospace;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
   cursor: pointer;
-  padding: 1px 3px;
-  border-radius: 2px;
+  padding: 3px 6px;
+  border-radius: 3px;
   transition: all 0.2s;
+  background: rgba(173, 181, 189, 0.05);
+  border: 1px solid transparent;
 }
 
 .id:hover {
-  background: rgba(173, 181, 189, 0.1);
+  background: rgba(173, 181, 189, 0.12);
   color: #6c757d;
+  border-color: rgba(173, 181, 189, 0.2);
 }
 
 .idEditing {
   background: rgba(173, 181, 189, 0.15) !important;
-  outline: 1px solid #adb5bd;
+  outline: 2px solid #adb5bd;
   cursor: text;
   color: #495057;
+  border-color: #adb5bd;
 }
 
 .deleteButton {
-  padding: 2px;
+  padding: 6px;
   border: none;
   background: transparent;
-  border-radius: 2px;
+  border-radius: 4px;
   cursor: pointer;
   color: #ced4da;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.4;
+  opacity: 0;
   transition: all 0.2s;
+  width: 28px;
+  height: 28px;
+}
+
+.sectionHeader:hover .deleteButton {
+  opacity: 0.6;
 }
 
 .deleteButton:hover {
   background: rgba(220, 53, 69, 0.1);
   color: #dc3545;
-  opacity: 1;
+  opacity: 1 !important;
+  transform: scale(1.1);
 }
 
 .sectionContent {
-  padding: 8px 12px;
-  min-height: 40px;
+  padding: 8px 10px;
+  min-height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Add subtle background variations for different levels */
+.sectionWrapper[data-level="1"] .sectionContent {
+  background: rgba(140, 200, 255, 0.015);
+}
+
+.sectionWrapper[data-level="2"] .sectionContent {
+  background: rgba(140, 233, 154, 0.015);
+}
+
+.sectionWrapper[data-level="3"] .sectionContent {
+  background: rgba(255, 224, 102, 0.015);
+}
+
+.sectionWrapper[data-level="4"] .sectionContent {
+  background: rgba(255, 179, 217, 0.015);
+}
+
+/* Focus states for better accessibility */
+.sectionWrapper:focus-within {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sectionWrapper[data-level="2"] {
+    margin-left: 6px;
+  }
+  
+  .sectionWrapper[data-level="3"] {
+    margin-left: 12px;
+  }
+  
+  .sectionWrapper[data-level="4"] {
+    margin-left: 18px;
+  }
+  
+  .sectionHeader {
+    padding: 5px 8px;
+    min-height: 32px;
+  }
+  
+  .displayMode {
+    gap: 6px;
+  }
+  
+  .sectionContent {
+    padding: 6px 8px;
+  }
 }
