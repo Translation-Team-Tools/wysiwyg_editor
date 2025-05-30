@@ -14,6 +14,7 @@ declare module '@tiptap/core' {
         id?: string; 
         title?: string; 
         tagName?: 'section' | 'div';
+        sectionType?: 'chapter' | 'part' | 'container' | 'section';
       }) => ReturnType;
       exitSection: () => ReturnType;
     };
@@ -65,6 +66,18 @@ export const SectionExtension = Node.create<SectionOptions>({
           };
         },
       },
+      sectionType: {
+        default: null,
+        parseHTML: element => element.getAttribute('data-section-type'),
+        renderHTML: attributes => {
+          if (!attributes.sectionType) {
+            return {};
+          }
+          return {
+            'data-section-type': attributes.sectionType,
+          };
+        },
+      },
       tagName: {
         default: 'section',
         parseHTML: element => {
@@ -112,11 +125,13 @@ export const SectionExtension = Node.create<SectionOptions>({
           const { 
             id = `section${Date.now()}`, 
             title = 'Untitled',
-            tagName = 'section'
+            tagName = 'section',
+            sectionType
           } = attributes || {};
           
           const htmlTagName = tagName === 'div' ? 'div' : 'section';
-          const html = `<${htmlTagName} id="${id}" data-toc-title="${title}"><p></p></${htmlTagName}>`;
+          const sectionTypeAttr = sectionType ? ` data-section-type="${sectionType}"` : '';
+          const html = `<${htmlTagName} id="${id}" data-toc-title="${title}"${sectionTypeAttr}><p></p></${htmlTagName}>`;
           
           return commands.insertContent(html);
         },
@@ -163,6 +178,12 @@ export const SectionExtension = Node.create<SectionOptions>({
   addKeyboardShortcuts() {
     // Helper function to determine section type
     const getSectionType = (sectionNode: any) => {
+      // Check explicit sectionType attribute first
+      if (sectionNode.attrs.sectionType) {
+        return sectionNode.attrs.sectionType;
+      }
+      
+      // Fall back to title-based detection
       const title = (sectionNode.attrs.title || '').toLowerCase();
       if (title.startsWith('chapter')) return 'chapter';
       if (title.startsWith('part')) return 'part';

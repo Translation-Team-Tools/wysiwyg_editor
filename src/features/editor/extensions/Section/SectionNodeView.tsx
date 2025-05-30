@@ -21,8 +21,23 @@ export const SectionNodeView: React.FC<SectionNodeViewProps> = ({
   const titleRef = useRef<HTMLSpanElement>(null);
   const idRef = useRef<HTMLSpanElement>(null);
 
-  // Determine section level and type based on title
+  // Determine section level and type based on explicit type or title
   const sectionInfo = useMemo(() => {
+    // Check explicit sectionType attribute first
+    if (node.attrs.sectionType) {
+      const sectionType = node.attrs.sectionType.toLowerCase();
+      if (sectionType === 'chapter') {
+        return { level: 1, type: 'chapter', color: '#8cc8ff', canExit: false };
+      } else if (sectionType === 'part') {
+        return { level: 2, type: 'part', color: '#8ce99a', canExit: false };
+      } else if (sectionType === 'container') {
+        return { level: 3, type: 'container', color: '#ffe066', canExit: true };
+      } else if (sectionType === 'section') {
+        return { level: 4, type: 'section', color: '#ffb3d9', canExit: true };
+      }
+    }
+    
+    // Fall back to title-based detection
     const title = (node.attrs.title || 'Untitled').toLowerCase();
     
     if (title.startsWith('chapter')) {
@@ -37,7 +52,7 @@ export const SectionNodeView: React.FC<SectionNodeViewProps> = ({
       // Default for custom sections
       return { level: 1, type: 'custom', color: '#8cc8ff', canExit: true };
     }
-  }, [node.attrs.title]);
+  }, [node.attrs.title, node.attrs.sectionType]);
 
   const handleTitleDoubleClick = () => {
     setIsEditingTitle(true);
