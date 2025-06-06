@@ -18,13 +18,13 @@ const NavigationPanel: React.FC<NavigationPanelProps> = ({ width }) => {
       <nav className={styles.navigation}>
         <ul className={styles.navList}>
           <li className={styles.navItem}>
-            <a href="#editor" className={styles.navLink}>file1</a>
+            <a href="#prologue" className={styles.navLink}>Prologue</a>
           </li>
           <li className={styles.navItem}>
-            <a href="#output" className={styles.navLink}>file 2</a>
+            <a href="#chapter1" className={styles.navLink}>Chapter 1</a>
           </li>
           <li className={styles.navItem}>
-            <a href="#settings" className={styles.navLink}>file 3</a>
+            <a href="#chapter2" className={styles.navLink}>Chapter 2</a>
           </li>
         </ul>
       </nav>
