@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EditorContent } from '@tiptap/react';
 import { EditorToolbar } from './components/EditorToolbar.tsx';
 import { useBaseEditor } from './hooks/useBaseEditor.ts';
@@ -11,6 +11,21 @@ const BaseEditor: React.FC<BaseEditorProps> = ({
 }) => {
   const { editor, currentDocumentId, setCurrentDocumentId } = useBaseEditor({ content, onChange });
 
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleAllContentChanges = () => {
+      const currentHtml = editor.getHTML();
+      onChange(currentHtml);
+    };
+
+    // Listen to ALL content changes (user typing + programmatic)
+    editor.on('transaction', handleAllContentChanges);
+    
+    return () => {
+      editor.off('transaction', handleAllContentChanges);
+    };
+  }, [editor, onChange]);
 
   if (!editor) {
     return null;
