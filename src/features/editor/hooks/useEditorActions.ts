@@ -3,7 +3,7 @@ import { useTextFormatting } from './useTextFormatting';
 import { useListActions } from './useListActions';
 import { useMediaActions } from './useMediaActions';
 import { useDocumentStructure } from './useDocumentStructure';
-import { documentService } from '../../../shared/database/database';
+import { documentService, imageService } from '../../../shared/database/database';
 import { DEFAULT_EDITOR_CONTENT } from '../../../shared/constants/defaultContent';
 
 
@@ -22,6 +22,7 @@ export const useEditorActions = (
     try {
       if (currentDocumentId) {
         await documentService.delete(currentDocumentId);
+        await imageService.cleanupOrphaned();
       }
       setCurrentDocumentId?.(undefined);
       editor?.commands.setContent(DEFAULT_EDITOR_CONTENT);

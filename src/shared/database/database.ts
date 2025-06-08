@@ -133,17 +133,16 @@ export const imageService = {
     const allImages = await db.images.toArray();
     const documentIds = new Set((await db.documents.toArray()).map(doc => doc.id));
     
-    const orphanedImages = allImages.filter(img => 
-      img.documentId !== undefined && 
-      img.documentId !== null && 
-      !documentIds.has(img.documentId)
+    const unwantedImages = allImages.filter(img => 
+      (img.documentId !== undefined && img.documentId !== null && !documentIds.has(img.documentId)) ||
+      (img.documentId === undefined || img.documentId === null)
     );
     
-    if (orphanedImages.length > 0) {
-      const orphanedIds = orphanedImages.map(img => img.id!);
-      await db.images.bulkDelete(orphanedIds);
+    if (unwantedImages.length > 0) {
+      const unwantedIds = unwantedImages.map(img => img.id!);
+      await db.images.bulkDelete(unwantedIds);
     }
     
-    return orphanedImages.length;
+    return unwantedImages.length;
   }
 };
