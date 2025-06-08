@@ -34,9 +34,9 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
         <ButtonGroup buttons={TOOLBAR_CONFIG.lists} editor={editor} actions={actions} activeStates={activeStates} />
       </ToolbarSection>
 
-      {/* <ToolbarSection>
+      <ToolbarSection>
         <ButtonGroup buttons={TOOLBAR_CONFIG.media} editor={editor} actions={actions} activeStates={activeStates} />
-      </ToolbarSection> */}
+      </ToolbarSection>
 
       <ToolbarSection>
         <ButtonGroup buttons={TOOLBAR_CONFIG.structure} editor={editor} actions={actions} activeStates={activeStates} />

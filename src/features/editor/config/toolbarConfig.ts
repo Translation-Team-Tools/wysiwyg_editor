@@ -30,8 +30,8 @@ export const TOOLBAR_CONFIG = {
   ],
   
   media: [
-    { id: 'imageUrl', icon: Image, title: 'Insert Image from URL', action: 'insertImageFromUrl' },
-    { id: 'imageFile', icon: Upload, title: 'Upload Image File', action: 'insertImageFromFile' },
+    // { id: 'imageUrl', icon: Upload, title: 'Insert Image from URL', action: 'insertImageFromUrl' },
+    { id: 'imageFile', icon: Image, title: 'Add image', action: 'insertImageFromFile' },
   ],
   
   structure: [
