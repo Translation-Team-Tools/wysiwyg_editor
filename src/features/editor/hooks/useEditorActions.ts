@@ -10,11 +10,12 @@ import { DEFAULT_EDITOR_CONTENT } from '../../../shared/constants/defaultContent
 export const useEditorActions = (
     editor: Editor, 
     currentDocumentId?: number, 
-    setCurrentDocumentId?: (id: number | undefined) => void
+    setCurrentDocumentId?: (id: number | undefined) => void,
+    onChange?: (html: string) => void
   ) => {
   const textActions = useTextFormatting(editor);
   const listActions = useListActions(editor);
-  const mediaActions = useMediaActions(editor);
+  const mediaActions = useMediaActions(editor, currentDocumentId);
   const structureActions = useDocumentStructure(editor);
 
   const deleteCurrentDocument = async () => {

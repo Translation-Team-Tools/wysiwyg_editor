@@ -3,6 +3,7 @@ import { NodeViewWrapper } from '@tiptap/react';
 import type { NodeViewProps } from '@tiptap/react';
 import { X, RotateCcw, Edit3, ArrowDown } from 'lucide-react';
 import styles from './ImageComponent.module.css';
+import { imageService } from '../../../../shared/database/database';
 
 interface ImageComponentProps extends NodeViewProps {
   // Additional props if needed
@@ -19,6 +20,7 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
   const [hasError, setHasError] = useState(false);
   const [showEditInput, setShowEditInput] = useState(false);
   const [editUrl, setEditUrl] = useState(node.attrs.src || '');
+  const [resolvedSrc, setResolvedSrc] = useState<string>('');
   
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -33,11 +35,14 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
     setHasError(true);
   }, []);
 
-  const handleDelete = useCallback(() => {
-    // Get filename from src
-    if (node.attrs.src.startsWith('local:')) {
-      const filename = node.attrs.src.replace('local:', '');
-      localStorage.removeItem(`image_${filename}`);
+  const handleDelete = useCallback(async () => {
+    if (node.attrs.src.startsWith('db:')) {
+      const imageId = parseInt(node.attrs.src.replace('db:', ''));
+      try {
+        await imageService.delete(imageId);
+      } catch (error) {
+        console.error('Failed to delete image from database:', error);
+      }
     }
     
     deleteNode();
@@ -84,13 +89,21 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
     setEditUrl(node.attrs.src || '');
   }, [node.attrs.src]);
 
-  const resolveImageSrc = useCallback((src: string): string => {
-    if (src.startsWith('local:')) {
-      const filename = src.replace('local:', '');
-      const base64Data = localStorage.getItem(`image_${filename}`);
-      return base64Data || src; // Return base64 or fallback to original
+  const resolveImageSrc = useCallback(async (src: string): Promise<string> => {
+    if (src.startsWith('db:')) {
+      const imageId = parseInt(src.replace('db:', ''));
+      try {
+        const image = await imageService.getById(imageId);
+        if (image) {
+          return URL.createObjectURL(image.blob);
+        }
+      } catch (error) {
+        console.error('Failed to load image from database:', error);
+      }
+      return src;
     }
-    return src; // URL images returned as-is
+    
+    return src; // URL images
   }, []);
 
   // Helper function to add paragraph after image
@@ -125,6 +138,14 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
   }, [selected, showEditInput, handleDelete, addParagraphAfter]);
+
+  useEffect(() => {
+    const resolveSrc = async () => {
+      const resolved = await resolveImageSrc(node.attrs.src);
+      setResolvedSrc(resolved);
+    };
+    resolveSrc();
+  }, [node.attrs.src, resolveImageSrc]);
 
   const imageStyles: React.CSSProperties = {
     width: node.attrs.width ? `${node.attrs.width}px` : 'auto',
@@ -201,7 +222,7 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
         {!hasError && (
           <img
             ref={imageRef}
-            src={resolveImageSrc(node.attrs.src)} // Resolve here for display
+            src={resolvedSrc}
             alt={node.attrs.alt || ''}
             title={node.attrs.title || ''}
             style={imageStyles}
