@@ -76,7 +76,6 @@ export const useBaseEditor = ({ content, onChange }: UseBaseEditorProps) => {
       if (documentToLoad && editor) {
         setCurrentDocumentId(documentToLoad.id);
         editor.commands.setContent(documentToLoad.content);
-        // Don't trigger onChange here to avoid auto-save loop
       }
     } catch (error) {
       console.error('Failed to load document:', error);
@@ -89,5 +88,9 @@ export const useBaseEditor = ({ content, onChange }: UseBaseEditorProps) => {
     }
   }, [editor]);
 
-  return editor;
+  return { 
+    editor, 
+    currentDocumentId, 
+    setCurrentDocumentId 
+  };
 };

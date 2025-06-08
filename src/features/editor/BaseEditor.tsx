@@ -9,7 +9,8 @@ const BaseEditor: React.FC<BaseEditorProps> = ({
   content = '', 
   onChange = () => {} 
 }) => {
-  const editor = useBaseEditor({ content, onChange });
+  const { editor, currentDocumentId, setCurrentDocumentId } = useBaseEditor({ content, onChange });
+
 
   if (!editor) {
     return null;
@@ -17,7 +18,11 @@ const BaseEditor: React.FC<BaseEditorProps> = ({
 
   return (
     <div className={styles.editor}>
-      <EditorToolbar editor={editor} />
+      <EditorToolbar 
+        editor={editor} 
+        currentDocumentId={currentDocumentId}
+        setCurrentDocumentId={setCurrentDocumentId}
+      />
       <div className={styles.content}>
         <EditorContent editor={editor} />
       </div>

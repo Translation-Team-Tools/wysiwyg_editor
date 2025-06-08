@@ -8,10 +8,16 @@ import styles from './EditorToolbar.module.css';
 
 interface EditorToolbarProps {
   editor: Editor;
+  currentDocumentId?: number;
+  setCurrentDocumentId?: (id: number | undefined) => void;
 }
 
-export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
-  const { actions, getActiveStates } = useEditorActions(editor);
+export const EditorToolbar: React.FC<EditorToolbarProps> = ({ 
+      editor, 
+      currentDocumentId, 
+      setCurrentDocumentId 
+    }) => {
+  const { actions, getActiveStates } = useEditorActions(editor, currentDocumentId, setCurrentDocumentId);
   const activeStates = getActiveStates();
 
   return (
@@ -32,8 +38,11 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
         <ButtonGroup buttons={TOOLBAR_CONFIG.media} editor={editor} actions={actions} activeStates={activeStates} />
       </ToolbarSection> */}
 
-      <ToolbarSection showDivider={false}>
+      <ToolbarSection>
         <ButtonGroup buttons={TOOLBAR_CONFIG.structure} editor={editor} actions={actions} activeStates={activeStates} />
+      </ToolbarSection>
+      <ToolbarSection>
+        <ButtonGroup buttons={TOOLBAR_CONFIG.document} editor={editor} actions={actions} activeStates={activeStates} />
       </ToolbarSection>
     </div>
   );

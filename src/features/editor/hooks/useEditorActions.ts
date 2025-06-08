@@ -3,12 +3,31 @@ import { useTextFormatting } from './useTextFormatting';
 import { useListActions } from './useListActions';
 import { useMediaActions } from './useMediaActions';
 import { useDocumentStructure } from './useDocumentStructure';
+import { documentService } from '../../../shared/database/database';
+import { DEFAULT_EDITOR_CONTENT } from '../../../shared/constants/defaultContent';
 
-export const useEditorActions = (editor: Editor) => {
+
+export const useEditorActions = (
+    editor: Editor, 
+    currentDocumentId?: number, 
+    setCurrentDocumentId?: (id: number | undefined) => void
+  ) => {
   const textActions = useTextFormatting(editor);
   const listActions = useListActions(editor);
   const mediaActions = useMediaActions(editor);
   const structureActions = useDocumentStructure(editor);
+
+  const deleteCurrentDocument = async () => {
+    try {
+      if (currentDocumentId) {
+        await documentService.delete(currentDocumentId);
+      }
+      setCurrentDocumentId?.(undefined);
+      editor?.commands.setContent(DEFAULT_EDITOR_CONTENT);
+    } catch (error) {
+      console.error('Failed to delete document:', error);
+    }
+  };
 
   // Centralized action dispatcher
   const actions = {
@@ -31,6 +50,7 @@ export const useEditorActions = (editor: Editor) => {
     insertPart: structureActions.insertPart,
     insertContainer: structureActions.insertContainer,
     insertNestedContainer: structureActions.insertNestedContainer,
+    deleteCurrentDocument,
   };
 
   // Centralized active state checker

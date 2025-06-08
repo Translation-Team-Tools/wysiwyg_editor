@@ -1,5 +1,5 @@
 import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, Heading3, 
-         Type, RemoveFormatting, List, ListOrdered, Image, Upload, BookOpen, FileText, Box, Square } from 'lucide-react';
+         Type, RemoveFormatting, List, ListOrdered, Image, Upload, BookOpen, FileText, Box, Square, Trash2 } from 'lucide-react';
 
 export interface ButtonConfig {
   id: string;
@@ -39,5 +39,8 @@ export const TOOLBAR_CONFIG = {
     { id: 'part', icon: FileText, title: 'Add Part (section)', action: 'insertPart' },
     { id: 'container', icon: Box, title: 'Add Container (as sibling)', action: 'insertContainer' },
     { id: 'nestedContainer', icon: Square, title: 'Add Nested Container (inside current)', action: 'insertNestedContainer' },
+  ],
+  document: [
+    { id: 'deleteAndNew', icon: Trash2, title: 'Delete Document & Create New', action: 'deleteCurrentDocument' },
   ],
 };

@@ -1,0 +1,1 @@
+export const DEFAULT_EDITOR_CONTENT = '<section id="prologue" data-toc-title="Prologue" data-section-type="chapter"><section id="prologue_intro" data-toc-title="Intro" data-section-type="part"><p></p></section></section>';
