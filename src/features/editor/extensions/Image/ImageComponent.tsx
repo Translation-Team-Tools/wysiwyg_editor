@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { NodeViewWrapper } from '@tiptap/react';
 import type { NodeViewProps } from '@tiptap/react';
-import { X, RotateCcw, Edit3, ArrowDown } from 'lucide-react';
+import { X, RotateCcw } from 'lucide-react';
 import styles from './ImageComponent.module.css';
 import { imageService } from '../../../../shared/database/database';
 
@@ -18,8 +18,6 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [showEditInput, setShowEditInput] = useState(false);
-  const [editUrl, setEditUrl] = useState(node.attrs.src || '');
   const [resolvedSrc, setResolvedSrc] = useState<string>('');
   
   const imageRef = useRef<HTMLImageElement>(null);
@@ -57,38 +55,6 @@ export const ImageComponent: React.FC<ImageComponentProps> = ({
     }
   }, [node.attrs.src]);
 
-  const handleEditUrl = useCallback(() => {
-    setShowEditInput(true);
-    setEditUrl(node.attrs.src || '');
-  }, [node.attrs.src]);
-
-const handleUrlSubmit = useCallback((e: React.FormEvent) => {
-  e.preventDefault();
-  if (editUrl.trim()) {
-    let finalUrl = editUrl.trim();
-    
-    // If it's a local reference, validate the file exists
-    if (finalUrl.startsWith('local:')) {
-      const filename = finalUrl.replace('local:', '');
-      const exists = localStorage.getItem(`image_${filename}`);
-      if (!exists) {
-        alert(`Local file "${filename}" not found`);
-        return;
-      }
-    }
-    
-    updateAttributes({ src: finalUrl });
-    setShowEditInput(false);
-    setIsLoading(true);
-    setHasError(false);
-  }
-}, [editUrl, updateAttributes]);
-
-  const handleUrlCancel = useCallback(() => {
-    setShowEditInput(false);
-    setEditUrl(node.attrs.src || '');
-  }, [node.attrs.src]);
-
   const resolveImageSrc = useCallback(async (src: string): Promise<string> => {
     if (src.startsWith('db:')) {
       const imageId = parseInt(src.replace('db:', ''));
@@ -118,7 +84,7 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (selected && !showEditInput) {
+      if (selected) {
         switch (e.key) {
           case 'Delete':
           case 'Backspace':
@@ -137,7 +103,7 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [selected, showEditInput, handleDelete, addParagraphAfter]);
+  }, [selected, handleDelete, addParagraphAfter]);
 
   useEffect(() => {
     const resolveSrc = async () => {
@@ -181,40 +147,12 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
                   <RotateCcw size={14} />
                   Retry
                 </button>
-                <button onClick={handleEditUrl} className={styles.editButton}>
-                  <Edit3 size={14} />
-                  Edit URL
-                </button>
                 <button onClick={handleDelete} className={styles.deleteButton}>
                   <X size={14} />
                   Remove
                 </button>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* URL Edit Input */}
-        {showEditInput && (
-          <div className={styles.editContainer}>
-            <form onSubmit={handleUrlSubmit} className={styles.editForm}>
-              <input
-                type="url"
-                value={editUrl}
-                onChange={(e) => setEditUrl(e.target.value)}
-                placeholder="Enter image URL..."
-                className={styles.editInput}
-                autoFocus
-              />
-              <div className={styles.editActions}>
-                <button type="submit" className={styles.saveButton}>
-                  Save
-                </button>
-                <button type="button" onClick={handleUrlCancel} className={styles.cancelButton}>
-                  Cancel
-                </button>
-              </div>
-            </form>
           </div>
         )}
 
@@ -233,14 +171,8 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
         )}
 
         {/* Selection Toolbar */}
-        {selected && !isLoading && !hasError && !showEditInput && (
+        {selected && !isLoading && !hasError && (
           <div className={styles.toolbar}>
-            <button onClick={handleEditUrl} className={styles.toolbarButton} title="Edit URL">
-              <Edit3 size={14} />
-            </button>
-            <button onClick={addParagraphAfter} className={styles.toolbarButton} title="Add paragraph after">
-              <ArrowDown size={14} />
-            </button>
             <button onClick={handleDelete} className={styles.toolbarButton} title="Delete">
               <X size={14} />
             </button>
@@ -248,7 +180,7 @@ const handleUrlSubmit = useCallback((e: React.FormEvent) => {
         )}
 
         {/* Hint text when selected */}
-        {selected && !isLoading && !hasError && !showEditInput && (
+        {selected && !isLoading && !hasError && (
           <div className={styles.selectionHint}>
             Press Enter to add content after this image
           </div>
